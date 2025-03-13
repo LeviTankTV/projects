@@ -1,0 +1,67 @@
+export class PlayerSprite {
+    constructor(imagePath) {
+        this.image = new Image();
+        this.image.src = imagePath;
+        this.isLoaded = false;
+        this.loadError = false;
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.cachedSprite = null;
+
+        // Handle image loading success
+        this.image.onload = () => {
+            this.isLoaded = true;
+            console.log('Player sprite loaded successfully');
+        };
+
+        // Handle image loading error
+        this.image.onerror = () => {
+            this.loadError = true;
+            console.error('Failed to load player sprite');
+        };
+    }
+
+    draw(ctx, x, y, radius) {
+        const cachedCanvas = this.cacheSprite(radius);
+        ctx.drawImage(
+            cachedCanvas,
+            x - radius,
+            y - radius
+        );
+    }
+
+    cacheSprite(radius) {
+        if (this.cachedSprite && this.cachedSprite.radius === radius) {
+            return this.cachedSprite.canvas;
+        }
+
+        this.canvas.width = radius * 2;
+        this.canvas.height = radius * 2;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Круговая маска
+        this.ctx.beginPath();
+        this.ctx.arc(radius, radius, radius, 0, Math.PI * 2);
+        this.ctx.clip();
+
+        // Отрисовка изображения
+        this.ctx.drawImage(
+            this.image,
+            0,
+            0,
+            radius * 2,
+            radius * 2
+        );
+
+        this.cachedSprite = {
+            canvas: this.canvas,
+            radius: radius
+        };
+
+        return this.canvas;
+    }
+    // Optional: Method to check if sprite is ready
+    isReady() {
+        return this.isLoaded && !this.loadError;
+    }
+}

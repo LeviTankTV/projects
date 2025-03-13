@@ -1,0 +1,61 @@
+import { Petal } from './Petal.js';
+import { FriendlyBeetle } from './BeetlePet.js'; // Create this class (see below)
+
+export class BeetleEggPetal extends Petal {
+    constructor(rarity = 'common') {
+        const color = '#A0522D'; //Sienna color
+        const radius = 15;
+        super(color, radius, 'beetleEgg', true, null, rarity);
+        this.beetle = null;
+        this.beetleSpawned = false;
+        this.beetleImage = new Image();
+        this.beetleImage.src = "res/beetleegg.png";
+        this.eggImage = new Image();
+        this.eggImage.src = "res/beetleegg.png";
+        this.lastDestroyedTime = 0;
+
+        this.rechargeTime = 10000; // 10 seconds recharge time
+        this.isRecharging = true; // Start recharging
+    }
+
+
+    update(centerX, centerY, distance, angle) {
+        const currentTime = Date.now();
+        if(this.beetleSpawned && this.beetle.isDead){
+            this.beetleSpawned = false;
+            this.isRecharging = true;
+            this.lastDestroyedTime = currentTime;
+            this.beetle = null;
+        }
+
+        if (this.isRecharging) {
+            if (currentTime - this.lastDestroyedTime >= this.rechargeTime) {
+                this.isRecharging = false;
+            }
+        } else if (!this.beetleSpawned) {
+            this.spawnBeetle(centerX, centerY);
+        }
+        this.x = centerX + distance * Math.cos(angle);
+        this.y = centerY + distance * Math.sin(angle);
+
+
+    }
+
+    spawnBeetle(centerX, centerY) {
+        this.beetle = new FriendlyBeetle(centerX, centerY, this.rarity);
+        this.beetleSpawned = true;
+    }
+
+    draw(ctx) {
+        if (this.isRecharging) {
+            ctx.globalAlpha = 0.5;
+            ctx.drawImage(this.eggImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            ctx.globalAlpha = 1.0;
+        } else if (!this.beetleSpawned){
+            ctx.globalAlpha = 0.5;
+            ctx.drawImage(this.eggImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            ctx.globalAlpha = 1.0;
+        }
+
+    }
+}

@@ -1,0 +1,8 @@
+import {Mob} from "./Mob.js";
+
+export class ForestMob extends Mob {
+    constructor(x, y, rarity) {
+        super(x, y, rarity, 'forest');
+        // Forest-specific modifications
+    }
+}

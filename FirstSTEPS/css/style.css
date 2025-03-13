@@ -1,0 +1,118 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    font-weight: bold; /* Добавлено для жирного текста во всем body */
+}
+
+#backgroundGif {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+#startMenu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center; /* Центрирование содержимого */
+    background: rgba(0, 0, 0, 0);
+    padding: 40px;
+    border-radius: 15px;
+    color: #00ff00;
+    display: flex; /* Добавлено */
+    flex-direction: column; /* Выстраиваем элементы вертикально */
+    align-items: center; /* Центрируем по горизонтали */
+}
+
+#startMenu h1 {
+    font-size: 4.5em; /* Увеличение размера заголовка */
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #ff4500, 0 0 20px #800080; /* Лавовый и фиолетовый цвет */
+    animation: lavaAnimation 2s infinite alternate; /* Добавление анимации */
+    background: linear-gradient(45deg, #ff4500, #800080); /* Лавово-фиолетовый градиент */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap; /* Предотвращает перенос текста */
+    overflow: hidden; /* Скрывает текст, выходящий за пределы контейнера */
+    text-overflow: ellipsis; /* Добавляет многоточие, если текст не помещается */
+}
+
+@keyframes lavaAnimation {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+.menu-button {
+    font-size: 2.5em; /* Увеличен размер шрифта в 2 раза */
+    padding: 20px 60px; /* Увеличены отступы для кнопок */
+    background-color: transparent;
+    color: #800080; /* Основной цвет текста */
+    border: 2px solid #ff4500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0px; /* Увеличен отступ между кнопками */
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    text-shadow: 0 0 5px #ff4500, 0 0 10px #a020f0; /* Уменьшено свечение и более яркий фиолетовый */
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap; /* Запрещает перенос текста */
+    width: 750px; /* Увеличена фиксированная ширина для всех кнопок */
+}
+
+.menu-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #800080; /* Фиолетовый фон */
+    opacity: 0; /* Изначально невидимый */
+    transition: opacity 0.3s ease; /* Плавный переход */
+    z-index: 0; /* За текстом */
+}
+
+.menu-button::after {
+    content: attr(data-text); /* Дублирование текста */
+    position: absolute;
+    top: 50%; /* Центрирование по вертикали */
+    left: 50%; /* Центрирование по горизонтали */
+    transform: translate(-50%, -50%); /* Сдвиг для точного центрирования */
+    color: #ff4500; /* Лавовый цвет текста при наведении */
+    opacity: 0; /* Изначально невидимый */
+    transition: opacity 0.3s ease; /* Плавный переход */
+    z-index: 1; /* Над фиолетовым фоном */
+    text-shadow: 0 0 10px #ff4500, 0 0 20px #800080; /* Лавовый текст */
+}
+
+.menu-button:hover {
+    background-color: transparent; /* Фон остается прозрачным */
+}
+
+.menu-button:hover::before {
+    opacity: 1; /* Появление фиолетового фона при наведении */
+}
+
+.menu-button:hover::after {
+    opacity: 1; /* Появление лавового текста при наведении */
+}
+
+#gameContainer {
+    display: none;
+}

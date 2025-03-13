@@ -1,0 +1,543 @@
+:root {
+    --primary-color: #6a11cb;
+    --secondary-color: #2575fc;
+    --text-color: #333;
+}
+
+* {
+    margin: 0;
+    padding: 5px;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif
+}
+
+body {
+    background: linear-gradient(270deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Use full height of the viewport */
+    overflow: hidden;
+    background-size: 400% 400%;
+    animation: gradientAnimation 5s ease infinite;
+    user-select: none;
+}
+
+#main-menu {
+    position: relative;
+    width: 100%;
+    max-height: 2000px;
+    max-width: 2000px;
+    padding: 20px; /* Add padding for spacing */
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* Optional: Add background for better contrast */
+    border-radius: 500px; /* Optional: Rounded corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Optional: Shadow effect */
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-align: center; /* Center the title */
+}
+
+.hotbar {
+    margin: 1px 400px; /* Add margin for spacing */
+}
+
+.hotbar h2 {
+    text-align: center; /* Center the hotbar title */
+    margin-bottom: 10px;
+}
+
+.hotbar-buttons {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); /* 10 buttons per row */
+    gap: 10px; /* Space between buttons */
+}
+
+.hotbar-button {
+    width: 50px; /* Make buttons take full width of grid cell */
+    height: 50px; /* Set height for squares */
+    border: 1px solid #ddd; /* Optional: Add border to buttons */
+    border-radius: 2px;
+    background: #f0f0f0;
+    cursor: pointer;
+    font-size: 18px; /* Font size for button text */
+    transition: background 0.3s ease; /* Smooth background transition */
+}
+
+.hotbar-button:hover {
+    background: var(--primary-color); /* Change background on hover */
+    color: white; /* Change text color on hover */
+}
+
+.main-button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: block; /* Make it a block element */
+    margin: 20px auto; /* Center the button with margin */
+    width: 200px;
+    height: 50px;
+}
+
+.icons {
+    display: flex;
+    justify-content: space-around; /* Distribute icons evenly */
+    margin: 20px 0; /* Add margin for spacing */
+    user-select: none; /* Prevent text selection */
+}
+
+.icon {
+    width: 50px;
+    cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .hotbar-button {
+        height: 40px; /* Adjust height for smaller screens */
+    }
+
+    .icon {
+        width: 40px;
+    }
+
+    .main-button {
+        width: 100%;
+    }
+}
+
+.updates-list {
+    position: fixed; /* Fixed position to stay at the top left of the screen */
+    top: 20px;
+    left: 20px;
+    width: 300px;
+    max-height: 400px; /* Limit height for scrolling */
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: none; /* Hidden by default */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.updates-list h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 1.5em;
+    text-shadow: 1px 1px 2px black; /* Black stroke effect */
+}
+
+.updates-list ul {
+    list-style-type: none; /* Remove default list styling */
+}
+
+.updates-list li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd; /* Add a separator */
+    font-size: 1.1em; /* Slightly larger font size for better readability */
+    text-shadow: 1px 1px 2px black; /* Black stroke effect */
+}
+
+.updates-list li:last-child {
+    border-bottom: none; /* Remove border from last item */
+}
+
+.updates-list li:hover {
+    background: #f0f0f0; /* Highlight on hover */
+}
+
+#game-title {
+    position: fixed; /* Fixed position to stay at the top of the screen */
+    top: 0;
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Shift left by half its width to center it */
+    font-size: 4em; /* Large font size for prominence */
+    color: #ffffff; /* White text color */
+    text-shadow:
+            2px 2px  black, /* Black stroke effect */
+            -2px -2px  black,
+            2px -2px  black,
+            -2px 2px  black; /* Create a thick black stroke */
+    font-family: 'Roboto', sans-serif; /* Use a stylish font */
+    text-align: center; /* Center the text */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+#hotbarSign {
+    position: fixed; /* Fixed position to stay at the top of the screen */
+    top: 1px; /* 500 pixels from the top */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Shift left by half its width to center it */
+    font-size: 3em; /* Large font size for prominence */
+    color: #ffffff; /* White text color */
+    text-shadow:
+            2px 2px  black, /* Black stroke effect */
+            -2px -2px black,
+            2px -2px  black,
+            -2px 2px  black; /* Create a thick black stroke */
+    font-family: 'Roboto', sans-serif; /* Use a stylish font */
+    text-align: center; /* Center the text */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+.inventory-list {
+    position: fixed; /* Fixed position to stay in a specific place */
+    top: 10px; /* Adjust as needed */
+    left: 20px; /* Adjust as needed */
+    width: 400px; /* Width of the inventory list */
+    height: 400px;
+    max-height: 4000px; /* Limit height for scrolling */
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: none; /* Hidden by default */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.inventory-list h3 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.inventory-list ul {
+    list-style-type: none; /* Remove default list styling */
+}
+
+.inventory-list li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd; /* Add a separator */
+    font-size: 1.1em; /* Slightly larger font size for better readability */
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+.gallery {
+    position: fixed; /* Fixed position to stay at the bottom of the screen */
+    bottom: 0; /* Position at the bottom */
+    left: 0; /* Align to the left */
+    width: 100%; /* Full width */
+    max-height: 560px; /* Limit height for scrolling */
+    background: linear-gradient(270deg, var(--primary-color), var(--secondary-color), var(--primary-color)); /* Animated gradient */
+    background-size: 400% 400%; /* Larger size for smooth animation */
+    animation: gradientAnimation 15s ease infinite; /* Animation effect */
+    border-radius: 15px 15px 0 0; /* Rounded top corners */
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2); /* Shadow effect */
+    padding: 10px;
+    display: none; /* Hidden by default */
+    overflow-y: auto; /* Enable vertical scrolling */
+    z-index: 1001;
+    scrollbar-width: thin; /* Thin scrollbar */
+    scrollbar-color: var(--primary-color) rgba(255, 255, 255, 0.5);
+}
+
+.gallery::-webkit-scrollbar {
+    width: 12px; /* Width of the scrollbar */
+}
+
+.gallery::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.5); /* Background of the scrollbar track */
+    border-radius: 10px; /* Rounded corners for the track */
+}
+
+.gallery::-webkit-scrollbar-thumb {
+    background: var(--primary-color); /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+.gallery::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color); /* Change color on hover */
+}
+.gallery h3 {
+    text-align: center;
+}
+
+.gallery-content {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr); /* 8 squares per row */
+    gap: 10px; /* Space between squares */
+}
+
+.gallery-square {
+    width: 50px; /* Set width for squares */
+    height: 50px; /* Set height for squares */
+    border: 1px solid #ddd; /* Border for squares */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #f0f0f0; /* Default background color */
+    display: flex; /* Center content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    cursor: pointer; /* Pointer cursor */
+}
+
+.gallery-square.question-mark {
+    background-color: #fff; /* White background for question mark */
+    font-size: 24px; /* Larger font size for question mark */
+    color: #aaa; /* Gray color for question mark */
+}
+
+.close-button {
+    display: block; /* Make it a block element */
+    margin: 10px auto; /* Center it horizontally */
+    padding: 5px 10px; /* Add some padding */
+    background-color: #ff4d4d; /* Red background for close button */
+    color: white; /* White text */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+}
+
+.close-button:hover {
+    background-color: #ff1a1a; /* Darker red on hover */
+}
+
+.settings-list {
+    position: fixed; /* Fixed position to stay at the top left of the screen */
+    top: 20px; /* Position from the top */
+    left: 20px; /* Position from the left */
+    width: 250px; /* Width of the settings list */
+    max-height: 400px; /* Limit height for scrolling */
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: none; /* Hidden by default */
+    overflow-y: auto; /* Enable vertical scrolling */
+    z-index: 1001;
+}
+
+.settings-list h3 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.settings-list ul {
+    list-style-type: none; /* Remove default list styling */
+    padding: 0; /* Remove padding */
+}
+
+.settings-list li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd; /* Add a separator */
+    font-size: 1.1em; /* Slightly larger font size for better readability */
+}
+
+.settings-list li:last-child {
+    border-bottom: none; /* Remove border from last item */
+}
+
+.crafting-menu {
+    position: fixed; /* Fixed position to stay at the top left of the screen */
+    top: 20px; /* Position from the top */
+    left: 300px; /* Position from the left */
+    width: 300px; /* Width of the crafting menu */
+    max-height: 500px; /* Limit height for scrolling */
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: none; /* Hidden by default */
+    overflow-y: auto; /* Enable vertical scrolling */
+    z-index: 1001;
+}
+
+.crafting-squares {
+    position: relative; /* For absolute positioning of squares */
+    height: 150px; /* Set a height for the pentagon layout */
+}
+
+/* Pentagon layout for crafting squares */
+.crafting-square {
+    width: 50px; /* Width for crafting squares */
+    height: 50px; /* Height for crafting squares */
+    border: 1px solid #ddd; /* Border for squares */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #f0f0f0; /* Default background color */
+    display: flex; /* Center content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    cursor: pointer; /* Pointer cursor */
+    position: absolute; /* Positioning for pentagon layout */
+}
+
+/* Positioning squares to form a pentagon */
+#craft-square-1 {
+    top: 0; /* Top square */
+    left: 50%; /* Centered horizontally */
+    transform: translate(-50%, 0); /* Adjust to center */
+}
+
+#craft-square-2 {
+    top: 50px; /* Adjust height */
+    left: 17%; /* Left square */
+}
+
+#craft-square-3 {
+    top: 50px; /* Adjust height */
+    right: 17%; /* Right square */
+}
+
+#craft-square-4 {
+    top: 110px; /* Adjust height */
+    left: 25%; /* Middle left square */
+}
+
+#craft-square-5 {
+    top: 110px; /* Adjust height */
+    right: 25%; /* Middle right square */
+}
+
+.crafting-square:hover {
+    background-color: #e0e0e0; /* Slightly darker on hover */
+}
+
+.success-chance {
+    text-align: center;
+    margin-top: 10px;
+}
+.menu-container {
+    display: flex; /* Align crafting menu and inventory side by side */
+    gap: 20px; /* Space between crafting menu and inventory */
+}
+
+.crafting-menu,
+.inventory-list {
+    flex: 1; /* Allow both to take equal space */
+}
+
+.inventory-container {
+    position: relative; /* Position for absolute items */
+    width: 100%; /* Full width */
+    height: 300px; /* Set a fixed height */
+    display: flex;
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Center items vertically */
+}
+
+.inventory-square {
+    width: 50px; /* Width of inventory squares */
+    height: 50px; /* Height of inventory squares */
+    border: 1px solid #ddd; /* Border for squares */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #f0f0f0; /* Default background color */
+    display: flex; /* Center content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    position: absolute; /* Position absolutely for pentagon layout */
+}
+
+/* Positioning for pentagon layout */
+#inventory-item-1 { top: 0; left: 50%; transform: translate(-50%, -50%); }
+#inventory-item-2 { top: 50%; left: 0; transform: translate(-50%, -50%); }
+#inventory-item-3 { bottom: 0; left: 50%; transform: translate(-50%, 50%); }
+#inventory-item-4 { top: 50%; right: 0; transform: translate(50%, -50%); }
+#inventory-item-5 { top: 50%; left: 25%; transform: translate(-50%, -50%); }
+
+.server-menu {
+    position: fixed; /* Fixed position to stay at the center */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Center adjustment */
+    width: 300px; /* Width of the server menu */
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    z-index: 1001; /* Ensure it appears above other elements */
+    display: none; /* Hidden by default */
+    text-align: center; /* Center text */
+}
+
+.main-server {
+    font-size: 1.5em; /* Increase font size */
+    color: #ff0000; /* Change text color to red */
+    font-weight: bold; /* Make the text bold */
+    text-shadow: 1px 1px 2px black; /* Add a shadow effect for better visibility */
+}
+
+.fade {
+    transition: opacity 0.8s ease; /* Change the duration and easing as needed */
+    opacity: 0; /* Start with an opacity of 0 */
+    visibility: hidden; /* Hidden by default */
+}
+
+.fade.show {
+    opacity: 1; /* Fully visible */
+    visibility: visible; /* Make it visible */
+}
+
+#user-info {
+    text-align: center; /* Center align user info */
+    margin: 20px 0; /* Add margin for spacing */
+}
+
+#username-display {
+    font-size: 24px; /* Increase font size for better visibility */
+    font-weight: bold; /* Make username bold */
+    color: var(--primary-color); /* Use primary color for text */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Add subtle shadow */
+}
+
+#level-container {
+    margin-top: 20px; /* Add margin for spacing */
+}
+
+#level-display {
+    font-size: 24px; /* Increase font size for level display */
+    font-weight: bold; /* Make level bold */
+    color: #555; /* Slightly darker color for contrast */
+    background: linear-gradient(90deg, #ff7e5f, #feb47b); /* Gradient background */
+    -webkit-background-clip: text; /* Clip background to text */
+    -webkit-text-fill-color: transparent; /* Make text transparent */
+    animation: gradientAnimation 0.1s ease infinite; /* Animation effect */
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+#experience-bar {
+    width: 100%; /* Full width */
+    max-width: 500px; /* Max width for the experience bar */
+    height: 25px; /* Height of the experience bar */
+    background-color: rgba(255, 255, 255, 0.5); /* Light background */
+    border-radius: 15px; /* Rounded corners for the bar */
+    border: 2px solid var(--primary-color); /* Border for the bar */
+    overflow: hidden; /* Hide overflow */
+    margin: 10px auto; /* Center the bar */
+}
+
+#experience-fill {
+    height: 100%; /* Full height */
+    width: 0; /* Start with 0 width */
+    background: linear-gradient(90deg, #6a11cb, #2575fc); /* Gradient fill */
+    border-radius: 15px; /* Rounded corners for the fill */
+    transition: width 0.5s ease; /* Smooth transition for filling */
+}

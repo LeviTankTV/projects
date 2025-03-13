@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Текстовый Рогалик</title>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: black;
+            color: green;
+            text-align: center;
+            padding: 50px;
+        }
+        #gameScreen {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #111;
+            padding: 20px;
+            border: 2px solid green;
+        }
+        button {
+            margin: 5px;
+            background-color: #222;
+            color: green;
+            border: 1px solid green;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: green;
+            color: black;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div id="gameScreen">
+    <h2>Подземелье Авантюриста</h2>
+    <div id="story"></div>
+    <div id="actions"></div>
+    <div id="stats"></div>
+    <div id="combat-log"></div>
+</div>
+
+<script>
+    class Game {
+        constructor() {
+            this.player = {
+                health: 100,
+                maxHealth: 100,
+                attack: 15,
+                defense: 5,
+                level: 1,
+                experience: 0
+            };
+            this.currentRoomIndex = 0;
+            this.rooms = [];
+            this.visitedRooms = new Set();
+            this.initGame();
+        }
+
+        initGame() {
+            this.generateDungeon(7);
+            this.currentRoomIndex = 0;
+            this.visitedRooms.add(0);
+            this.updateDisplay();
+        }
+
+        generateDungeon(roomCount) {
+            for(let i = 0; i < roomCount; i++) {
+                this.rooms.push({
+                    id: i,
+                    description: this.generateRoomDescription(),
+                    enemy: Math.random() > 0.5 ? this.generateEnemy() : null,
+                    treasure: Math.random() > 0.6 ? this.generateTreasure() : null,
+                    isVisited: false
+                });
+            }
+        }
+
+        generateRoomDescription() {
+            const descriptions = [
+                "Темная каменная комната с мшистыми стенами",
+                "Сырой подземный коридор с капающей водой",
+                "Зал с древними колоннами",
+                "Узкий проход с трещащими факелами",
+                "Комната с разбросанными костями"
+            ];
+            return descriptions[Math.floor(Math.random() * descriptions.length)];
+        }
+
+        generateEnemy() {
+            const enemies = [
+                {name: "Гоблин", health: 40, maxHealth: 40, damage: 15, experience: 20},
+                {name: "Скелет", health: 35, maxHealth: 35, damage: 20, experience: 15},
+                {name: "Крыса", health: 25, maxHealth: 25, damage: 20, experience: 10}
+            ];
+            return {...enemies[Math.floor(Math.random() * enemies.length)]};
+        }
+
+        generateTreasure() {
+            const treasures = [
+                {name: "Золотая монета", effect: () => this.player.health += 10},
+                {name: "Зелье лечения", effect: () => this.player.health = Math.min(this.player.maxHealth, this.player.health + 30)},
+                {name: "Старинный меч", effect: () => this.player.attack += 5},
+                {name: "Кольцо защиты", effect: () => this.player.defense += 3}
+            ];
+            return treasures[Math.floor(Math.random() * treasures.length)];
+        }
+
+        updateDisplay() {
+            const currentRoom = this.rooms[this.currentRoomIndex];
+            const storyEl = document.getElementById('story');
+            const actionsEl = document.getElementById('actions');
+            const statsEl = document.getElementById('stats');
+            const combatLogEl = document.getElementById('combat-log');
+
+            storyEl.innerHTML = `
+            <p>${currentRoom.description}</p>
+            ${currentRoom.enemy ?
+                `<p>В комнате ${currentRoom.enemy.name}!
+                Здоровье врага: ${currentRoom.enemy.health}/${currentRoom.enemy.maxHealth}</p>` :
+                '<p>Комната пуста</p>'}
+            ${currentRoom.treasure ?
+                `<p>Вы видите: ${currentRoom.treasure.name}</p>` :
+                ''}
+        `;
+
+            actionsEl.innerHTML = `
+            ${this.currentRoomIndex > 0 ?
+                '<button onclick="game.moveToPreviousRoom()">Вернуться назад</button>' :
+                ''}
+            ${this.currentRoomIndex < this.rooms.length - 1 ?
+                '<button onclick="game.moveToNextRoom()">Идти дальше</button>' :
+                ''}
+            ${currentRoom.enemy ?
+                '<button onclick="game.fight()">Сразиться</button>' :
+                ''}
+            ${currentRoom.treasure ?
+                '<button onclick="game.collectTreasure()">Подобрать</button>' :
+                ''}
+        `;
+
+            statsEl.innerHTML = `
+            <p>Здоровье: ${this.player.health}/${this.player.maxHealth} |
+            Атака: ${this.player.attack} |
+            Защита: ${this.player.defense} |
+            Уровень: ${this.player.level} |
+            Опыт: ${this.player.experience}</p>
+        `;
+
+            combatLogEl.innerHTML = ''; // Очистка журнала боя
+        }
+
+        moveToNextRoom() {
+            if(this.currentRoomIndex < this.rooms.length - 1) {
+                this.currentRoomIndex++;
+                this.visitedRooms.add(this.currentRoomIndex);
+                this.updateDisplay();
+            }
+        }
+
+        moveToPreviousRoom() {
+            if(this.currentRoomIndex > 0) {
+                this.currentRoomIndex--;
+                this.updateDisplay();
+            }
+        }
+
+        collectTreasure() {
+            const currentRoom = this.rooms[this.currentRoomIndex];
+            if(currentRoom.treasure) {
+                currentRoom.treasure.effect();
+                const combatLogEl = document.getElementById('combat-log');
+                combatLogEl.innerHTML = `Вы подобрали ${currentRoom.treasure.name}!`;
+                currentRoom.treasure = null;
+                this.updateDisplay();
+            }
+        }
+
+        fight() {
+            const currentRoom = this.rooms[this.currentRoomIndex];
+            const combatLogEl = document.getElementById('combat-log');
+
+            if(currentRoom.enemy) {
+                // Урон игроку
+                const playerDamage = Math.max(0, currentRoom.enemy.damage - this.player.defense);
+                this.player.health -= playerDamage;
+
+                // Урон врагу
+                const enemyDamage = Math.max(0, this.player.attack - (currentRoom.enemy.defense || 0));
+                currentRoom.enemy.health -= enemyDamage;
+
+                // Журнал боя
+                combatLogEl.innerHTML = `
+                <p>Вы наносите ${enemyDamage} урона ${currentRoom.enemy.name}</p>
+                 <p>${currentRoom.enemy.name} наносит вам ${playerDamage} урона!</p>
+            `;
+
+                // Проверка на победу
+                if (currentRoom.enemy.health <= 0) {
+                    alert(`Вы победили ${currentRoom.enemy.name}!`);
+                    this.player.experience += currentRoom.enemy.experience;
+                    currentRoom.enemy = null; // Убираем врага из комнаты
+                }
+
+                // Проверка на поражение
+                if (this.player.health <= 0) {
+                    alert('Вы погибли! Игра окончена.');
+                    this.resetGame(); // Сброс игры при смерти
+                }
+
+                this.updateDisplay(); // Обновляем интерфейс после боя
+            }
+        }
+
+        resetGame() {
+            this.player.health = this.player.maxHealth;
+            this.player.attack = 15;
+            this.player.defense = 5;
+            this.player.level = 1;
+            this.player.experience = 0;
+            this.currentRoomIndex = 0;
+            this.rooms = [];
+            this.visitedRooms.clear();
+            this.initGame();
+        }
+    }
+
+    const game = new Game();
+</script>
+</body>
+</html>

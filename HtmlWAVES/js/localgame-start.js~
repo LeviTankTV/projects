@@ -1,0 +1,139 @@
+import RoomManager from './multiplayer/RoomManager.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    const startContainer = document.querySelector('.start-container');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const playerNameInput = document.getElementById('player-name');
+    const gameCanvas = document.getElementById('gameCanvas');
+    const multiplayerButtons = document.createElement('div');
+    multiplayerButtons.classList.add('multiplayer-buttons');
+    multiplayerButtons.innerHTML = `
+        <button id="create-room-btn">Create Room</button>
+        <button id="join-room-btn">Join Room</button>
+    `;
+    multiplayerButtons.style.display = 'none';
+
+    // Create loading screen (keep your existing loading screen code)
+    const loadingScreen = document.createElement('div');
+    loadingScreen.style.position = 'fixed';
+    loadingScreen.style.top = '0';
+    loadingScreen.style.left = '0';
+    loadingScreen.style.width = '100%';
+    loadingScreen.style.height = '100%';
+    loadingScreen.style.background = 'rgba(0,0,0,0.8)';
+    loadingScreen.style.display = 'flex';
+    loadingScreen.style.justifyContent = 'center';
+    loadingScreen.style.alignItems = 'center';
+    loadingScreen.style.zIndex = '10000';
+    loadingScreen.style.color = 'white';
+    loadingScreen.style.fontFamily = "'Orbitron', sans-serif";
+    loadingScreen.innerHTML = `
+        <div style="text-align: center;">
+            <div class="loader" style="
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #3498db;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            "></div>
+            <h2>Loading Game...</h2>
+        </div>
+    `;
+    document.body.appendChild(loadingScreen);
+    loadingScreen.style.display = 'none';
+
+    // Add style for loader animation
+    const styleSheet = document.createElement("style")
+    styleSheet.innerText = `
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .multiplayer-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // Player name input validation
+    playerNameInput.addEventListener('input', () => {
+        const playerName = playerNameInput.value.trim();
+        startGameBtn.disabled = playerName.length === 0;
+    });
+
+    // Game mode selection
+    const localGameModeBtn = document.createElement('button');
+    localGameModeBtn.textContent = 'Local Game';
+    localGameModeBtn.addEventListener('click', () => {
+        startContainer.setAttribute('data-game-mode', 'local');
+        multiplayerButtons.style.display = 'none';
+        startGameBtn.style.display = 'block';
+    });
+
+    const multiplayerGameModeBtn = document.createElement('button');
+    multiplayerGameModeBtn.textContent = 'Multiplayer';
+    multiplayerGameModeBtn.addEventListener('click', () => {
+        startContainer.setAttribute('data-game-mode', 'multiplayer');
+        startGameBtn.style.display = 'none';
+        multiplayerButtons.style.display = 'flex';
+
+        // Initialize multiplayer connection
+        const playerName = playerNameInput.value.trim();
+        if (playerName) {
+            RoomManager.connectToMultiplayer(playerName);
+        }
+    });
+
+    // Append game mode buttons
+    startContainer.appendChild(localGameModeBtn);
+    startContainer.appendChild(multiplayerGameModeBtn);
+    startContainer.appendChild(multiplayerButtons);
+
+    // Room creation and join buttons
+    const createRoomBtn = multiplayerButtons.querySelector('#create-room-btn');
+    const joinRoomBtn = multiplayerButtons.querySelector('#join-room-btn');
+
+    createRoomBtn.addEventListener('click', () => {
+        RoomManager.showCreateRoomModal();
+    });
+
+    joinRoomBtn.addEventListener('click', () => {
+        RoomManager.showJoinRoomModal();
+    });
+
+    // Start game button event listener
+    startGameBtn.addEventListener('click', () => {
+        const playerName = playerNameInput.value.trim();
+        const gameMode = startContainer.getAttribute('data-game-mode');
+
+        console.log('Start Game Clicked', { playerName, gameMode });
+
+        if (playerName && gameMode === 'local') {
+            // Hide all UI elements
+            startContainer.style.display = 'none';
+            document.querySelector('.theme-selector').style.display = 'none';
+            document.getElementById('theme-pointer').style.display = 'none';
+
+            // Show loading screen
+            loadingScreen.style.display = 'flex';
+
+            // Ensure canvas is visible
+            gameCanvas.style.display = 'block';
+
+            // Simulate loading
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+
+                // Trigger local game start with player name
+                const localGameEvent = new CustomEvent('localGameStart', {
+                    detail: { playerName: playerName }
+                });
+                document.dispatchEvent(localGameEvent);
+            }, 1000);
+        }
+    });
+});

@@ -1,0 +1,8 @@
+import {Mob} from "./Mob.js";
+
+export class DesertMob extends Mob {
+    constructor(x, y, rarity) {
+        super(x, y, rarity, 'desert');
+        // Desert-specific modifications
+    }
+}

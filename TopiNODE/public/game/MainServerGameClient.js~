@@ -1,0 +1,121 @@
+import { io } from "socket.io-client"; // Ensure you have socket.io-client installed
+
+const socket = io('https://localhost:3000'); // Connect to your server
+const gameArea = document.getElementById('game-area');
+let player;
+
+// World dimensions
+const worldWidth = 30000;
+const worldHeight = 3000;
+
+// Initialize the game client
+function initializeGameClient() {
+    // Spawn the player in the safe zone
+    spawnPlayer();
+
+    // Set up event listeners for player movement
+    setupMovement();
+
+    // Listen for other players and mobs
+    socket.on('player:joined', addPlayer);
+    socket.on('player:update', updatePlayer);
+    socket.on('player:left', removePlayer);
+    socket.on('mob:spawn', addMob);
+}
+
+// Spawn the player
+function spawnPlayer() {
+    player = document.createElement('div');
+    player.className = 'player';
+    player.style.left = '100px'; // Initial X position
+    player.style.bottom = '100px'; // Initial Y position (safe zone)
+    gameArea.appendChild(player);
+
+    // Notify the server that this player has joined
+    socket.emit('player:init', { x: 100, y: 100 });
+
+    // Center the camera on the player
+    updateCamera();
+}
+
+// Handle player movement
+function setupMovement() {
+    document.addEventListener('keydown', (event) => {
+        const step = 10; // Movement step in pixels
+        let x = parseInt(player.style.left);
+        let y = parseInt(player.style.bottom);
+
+        switch (event.key) {
+            case 'ArrowUp':
+                y += step;
+                break;
+            case 'ArrowDown':
+                y -= step;
+                break;
+            case 'ArrowLeft':
+                x -= step;
+                break;
+            case 'ArrowRight':
+                x += step;
+                break;
+        }
+
+        // Update player position
+        player.style.left = `${x}px`;
+        player.style.bottom = `${y}px`;
+
+        // Update camera position
+        updateCamera();
+
+        // Send updated position to the server
+        socket.emit('player:move', { x, y });
+    });
+}
+
+// Center the camera on the player
+function updateCamera() {
+    const cameraX = player.offsetLeft - (window.innerWidth / 2) + (player.offsetWidth / 2);
+    const cameraY = player.offsetTop - (window.innerHeight / 2) + (player.offsetHeight / 2);
+
+    // Update game area to simulate camera movement
+    gameArea.style.transform = `translate(${-cameraX}px, ${-cameraY}px)`;
+}
+
+// Add other players to the game
+function addPlayer(playerData) {
+    const otherPlayer = document.createElement('div');
+    otherPlayer.className = 'player';
+    otherPlayer.style.left = `${playerData.x}px`;
+    otherPlayer.style.bottom = `${playerData.y}px`;
+    otherPlayer.dataset.id = playerData.id; // Store player ID for future reference
+    gameArea.appendChild(otherPlayer);
+}
+
+// Update other players' positions
+function updatePlayer(playerData) {
+    const otherPlayer = document.querySelector(`.player[data-id='${playerData.id}']`);
+    if (otherPlayer) {
+        otherPlayer.style.left = `${playerData.x}px`;
+        otherPlayer.style.bottom = `${playerData.y}px`;
+    }
+}
+
+// Remove a player from the game
+function removePlayer(playerData) {
+    const otherPlayer = document.querySelector(`.player[data-id='${playerData.id}']`);
+    if (otherPlayer) {
+        gameArea.removeChild(otherPlayer);
+    }
+}
+
+// Add mobs to the game
+function addMob(mobData) {
+    const mob = document.createElement('div');
+    mob.className = 'mob';
+    mob.style.left = `${mobData.x}px`;
+    mob.style.bottom = `${mobData.y}px`;
+    gameArea.appendChild(mob);
+}
+
+// Initialize the game client
+initializeGameClient();

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Topi</title>
+    <link rel="icon" href="/res/icon.png">
+    <link rel="stylesheet" href="/styles/mainMenu.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="main-menu">
+    <h1 id="game-title">Topi</h1>
+
+    <div class="hotbar" id="hotbar">
+        <h2>Hotbar</h2>
+        <div class="hotbar-buttons">
+            <!-- 10 interactive squares for Row 1 -->
+            <button class="hotbar-button" id="hotbar-btn1"></button>
+            <button class="hotbar-button" id="hotbar-btn2"></button>
+            <button class="hotbar-button" id="hotbar-btn3"></button>
+            <button class="hotbar-button" id="hotbar-btn4"></button>
+            <button class="hotbar-button" id="hotbar-btn5"></button>
+            <button class="hotbar-button" id="hotbar-btn6"></button>
+            <button class="hotbar-button" id="hotbar-btn7"></button>
+            <button class="hotbar-button" id="hotbar-btn8"></button>
+            <button class="hotbar-button" id="hotbar-btn9"></button>
+            <button class="hotbar-button" id="hotbar-btn10"></button>
+            <!-- 10 interactive squares for Row 2 -->
+            <button class="hotbar-button" id="hotbar-btn11"></button>
+            <button class="hotbar-button" id="hotbar-btn12"></button>
+            <button class="hotbar-button" id="hotbar-btn13"></button>
+            <button class="hotbar-button" id="hotbar-btn14"></button>
+            <button class="hotbar-button" id="hotbar-btn15"></button>
+            <button class="hotbar-button" id="hotbar-btn16"></button>
+            <button class="hotbar-button" id="hotbar-btn17"></button>
+            <button class="hotbar-button" id="hotbar-btn18"></button>
+            <button class="hotbar-button" id="hotbar-btn19"></button>
+            <button class="hotbar-button" id="hotbar-btn20"></button>
+        </div>
+    </div>
+
+    <button id="start-game" class="main-button">Choose Server</button>
+    <div id="user-info">
+        <h2 id="username-display">Username: <span id="username">User 123</span></h2>
+        <div>
+            <span id="level-display">Level: <span id="level-number">1</span></span>
+            <div id="experience-bar">
+                <div id="experience-fill"></div>
+            </div>
+        </div>
+    </div>
+    <div class="icons">
+        <img src="/res/crafting-icon.png" alt="Crafting" class="icon" id="crafting-icon">
+        <img src="/res/inventory-icon.png" alt="Inventory" class="icon" id="inventory-icon">
+        <img src="/res/gallery-icon.png" alt="Gallery" class="icon" id="gallery-icon">
+        <img src="/res/updates-icon.png" alt="Updates" class="icon" id="updates-icon">
+        <img src="/res/settings-icon.png" alt="Settings" class="icon" id="settings-icon">
+    </div>
+
+    <div id="updates-list" class="updates-list">
+        <h3>Updates</h3>
+        <ul id="updates-content"></ul>
+    </div>
+    <div id="inventory-list" class="inventory-list">
+        <h3>Inventory</h3>
+        <ul id="inventory-content">
+            <!-- Inventory items will be dynamically added here -->
+        </ul>
+    </div>
+    <div id="gallery" class="gallery">
+        <h3>Mob Gallery</h3>
+        <button id="close-gallery" class="close-button">Close</button> <!-- Close button -->
+        <div class="gallery-content" id="gallery-content">
+            <!-- Rows of squares will be dynamically added here -->
+        </div>
+    </div>
+    <div id="settings-list" class="settings-list">
+        <h3>Settings</h3>
+        <ul id="settings-content">
+            <li>
+                <label>
+                    <input type="checkbox" id="In-Developing-toggle" checked>
+                    Soon
+                </label>
+            </li>
+        </ul>
+    </div>
+    <div class="menu-container">
+        <div id="crafting-menu" class="crafting-menu">
+            <h3>Crafting Menu</h3>
+            <div class="crafting-squares">
+                <div class="crafting-square" id="craft-square-1"></div>
+                <div class="crafting-square" id="craft-square-2"></div>
+                <div class="crafting-square" id="craft-square-3"></div>
+                <div class="crafting-square" id="craft-square-4"></div>
+                <div class="crafting-square" id="craft-square-5"></div>
+            </div>
+            <button id="craft-button" class="main-button" disabled>Craft</button>
+            <div id="success-chance" class="success-chance">Chance of Success: 0%</div>
+        </div>
+
+        <div class="inventory-list">
+            <h3>Inventory</h3>
+            <div class="inventory-container">
+                <div class="inventory-square" id="inventory-item-1">Petals</div>
+                <div class="inventory-square" id="inventory-item-2">Petals</div>
+                <div class="inventory-square" id="inventory-item-3">Petals</div>
+                <div class="inventory-square" id="inventory-item-4">Petals</div>
+                <div class="inventory-square" id="inventory-item-5">Petals</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="server-menu" class="server-menu" style="display: none;">
+    <h3>Active Servers</h3>
+    <ul id="server-list">
+        <!-- Active servers will be dynamically added here -->
+    </ul>
+    <button id="create-server" class="main-button">Create Server</button>
+    <button id="join-server" class="main-button">Join Server</button>
+    <button id="return-to-menu" class="main-button">Return to Menu</button>
+</div>
+<script type="module" src="MainMenuInteractions.js"></script>
+</body>
+</html>

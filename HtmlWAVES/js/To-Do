@@ -1,0 +1,35 @@
+Petals: Light, Leaf, Peas, web, wing, yucca, ant egg, rose, soil, faster, corn, heavy.
+
+Mobs: Ant Hole, Ladybug, Spider, Worker Ant, Soldier Ant, Queen Ant, Rock, Centipede.
+
+Drop looting, better hotbar
+
+Inventory, Crafting.
+
+Future: Multiplayer, global site, database with saved player stats and optimization.
+Desert and Ocean biomes as well. Maybe jungle as well.
+
+Visual Appearance of players and better appearance in main menu, better main menu.
+
+Most Important part: Client - Server side, Socket.io, Node.js.
+
+// Applying a poison effect
+mob.applyStatusEffect({
+    type: 'poison',
+    duration: 2000,
+    damagePerTick: 5,
+    tickInterval: 500
+});
+
+// Applying a stun effect
+mob.applyStatusEffect({
+    type: 'stun',
+    duration: 1000
+});
+
+// Applying a slow effect
+mob.applyStatusEffect({
+    type: 'slow',
+    duration: 3000,
+    slowFactor: 0.5 // Reduces speed by 50%
+});

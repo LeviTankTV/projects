@@ -1,0 +1,94 @@
+if (!Math.clamp) {
+    Math.clamp = function(value, min, max) {
+        return Math.max(min, Math.min(value, max));
+    };
+}
+
+export class Camera {
+    constructor(canvas, worldWidth, worldHeight) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
+
+        // Zoom properties
+        this.zoom = 1.0;
+        this.minZoom = 0.5;
+        this.maxZoom = 2.0;
+
+        // Smooth camera movement
+        this.smoothingFactor = 0.1;
+        this.x = 0;  // Добавлено初始化x
+        this.y = 0;  // Добавлено初始化y
+        this.targetX = 0;
+        this.targetY = 0;
+    }
+
+    // Оптимизированный метод установки зума
+    setZoom(targetZoom) {
+        this.zoom = Math.clamp(targetZoom, this.minZoom, this.maxZoom);
+    }
+
+    // Улучшенный метод слежения с плавным движением
+    update(player, deltaTime = 16) {
+        const visibleWidth = this.canvas.width / this.zoom;
+        const visibleHeight = this.canvas.height / this.zoom;
+
+        // Целевая позиция центрирования
+        this.targetX = player.x + (player.width / 2) - (visibleWidth / 2);
+        this.targetY = player.y + (player.height / 2) - (visibleHeight / 2);
+
+        // Плавное движение камеры
+        this.x += (this.targetX - this.x) * this.smoothingFactor;
+        this.y += (this.targetY - this.y) * this.smoothingFactor;
+
+        // Ограничение позиции камеры
+        this.x = Math.clamp(this.x, 0, this.worldWidth - visibleWidth);
+        this.y = Math.clamp(this.y, 0, this.worldHeight - visibleHeight);
+    }
+    // Оптимизированные методы трансформации
+    begin() {
+        this.ctx.save();
+        this.ctx.scale(this.zoom, this.zoom);
+        this.ctx.translate(-this.x, -this.y);
+    }
+
+    end() {
+        this.ctx.restore();
+    }
+
+    // Новые utility методы
+    screenToWorldCoords(screenX, screenY) {
+        return {
+            x: (screenX / this.zoom) + this.x,
+            y: (screenY / this.zoom) + this.y
+        };
+    }
+
+    worldToScreenCoords(worldX, worldY) {
+        return {
+            x: (worldX - this.x) * this.zoom,
+            y: (worldY - this.y) * this.zoom
+        };
+    }
+
+    // Метод для плавного изменения зума
+    smoothZoom(targetZoom, duration = 300) {
+        const startZoom = this.zoom;
+        const startTime = performance.now();
+
+        const zoomAnimation = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Ease out квадратичная интерполяция
+            this.zoom = startZoom + (targetZoom - startZoom) * (1 - Math.pow(1 - progress, 3));
+
+            if (progress < 1) {
+                requestAnimationFrame(zoomAnimation);
+            }
+        };
+
+        requestAnimationFrame(zoomAnimation);
+    }
+}

@@ -1,0 +1,32 @@
+
+class Inventory {
+    constructor() {
+        this.letters = [];
+        this.items = [];
+    }
+
+    addLetter(letter) {
+        if (this.letters.length < 2) { // Limit to 2 letters
+            this.letters.push(letter);
+            return true; // Indicate success
+        }
+        return false; // Indicate failure (inventory full)
+    }
+
+    addItem(item) {
+        this.items.push(item);
+    }
+
+    getLetters() {
+        return this.letters;
+    }
+
+    getItems() {
+        return this.items;
+    }
+
+    clear() {
+        this.letters = [];
+        this.items = [];
+    }
+}

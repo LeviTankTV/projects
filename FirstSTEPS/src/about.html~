@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="author" content="LeviTank_TV">
+    <meta name="description" content="Тестовая страница">
+    <meta name="keywords" content="тест, проверка, html">
+    <title> Главная Страница </title>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th>Никнейм</th>
+        <th>Уровень</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>LeviTank_TV</td>
+        <td>275</td>
+    </tr>
+    <tr>
+        <td>CursedZ</td>
+        <td>113</td>
+    </tr>
+    </tbody>
+    <tfoot>
+    <tr>
+        <td>Всего</td>
+        
+
+
+    </tr>
+    </tfoot>
+</table>
+</body>
+</html>

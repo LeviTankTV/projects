@@ -1,0 +1,9 @@
+// User.ts
+export interface IUser {
+    _id: string; // Ensure _id is part of the interface
+    username: string;
+    createdAt: Date;
+
+    // Method signature
+    validatePassword(password: string): boolean;
+}

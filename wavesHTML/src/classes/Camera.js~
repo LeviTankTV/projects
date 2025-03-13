@@ -1,0 +1,28 @@
+export class Camera {
+    constructor(worldWidth, worldHeight, canvasWidth, canvasHeight) {
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.x = 0;
+        this.y = 0;
+        this.follow = this.follow.bind(this);
+    }
+
+    follow(player) {
+        // Center the camera on the player
+        this.x = player.x - this.canvasWidth / 2;
+        this.y = player.y - this.canvasHeight / 2;
+
+        // Clamp the camera position to keep it within the world bounds
+        this.x = Math.max(0, Math.min(this.x, this.worldWidth - this.canvasWidth));
+        this.y = Math.max(0, Math.min(this.y, this.worldHeight - this.canvasHeight));
+
+    }
+
+    resize(canvasWidth, canvasHeight) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        // You may want to adjust camera position or other properties here if needed
+    }
+}

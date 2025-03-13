@@ -1,0 +1,52 @@
+export class CanvasUtils {
+    /**
+     * Draws a rounded rectangle on canvas
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+     * @param {number} x - X coordinate of top-left corner
+     * @param {number} y - Y coordinate of top-left corner
+     * @param {number} width - Width of rectangle
+     * @param {number} height - Height of rectangle
+     * @param {number} radius - Corner radius
+     */
+    static roundedRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+    }
+
+    /**
+     * Creates a linear gradient with predefined color stops
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+     * @param {number} x - Start X coordinate
+     * @param {number} y - Start Y coordinate
+     * @param {number} width - Gradient width
+     * @returns {CanvasGradient}
+     */
+    static createProgressBarGradient(ctx, x, y, width) {
+        const gradient = ctx.createLinearGradient(x, y, x + width, y);
+        gradient.addColorStop(0, 'rgba(46, 204, 113, 0.7)');   // Green
+        gradient.addColorStop(0.5, 'rgba(241, 196, 15, 0.7)'); // Yellow
+        gradient.addColorStop(1, 'rgba(231, 76, 60, 0.7)');    // Red
+        return gradient;
+    }
+
+    /**
+     * Creates a text gradient
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+     * @param {number} x - Start X coordinate
+     * @param {number} y - Start Y coordinate
+     * @param {number} width - Gradient width
+     * @returns {CanvasGradient}
+     */
+    static createTextGradient(ctx, x, y, width) {
+        const textGradient = ctx.createLinearGradient(x, y, x + width, y);
+        textGradient.addColorStop(0, 'rgba(46, 204, 113, 1)');   // Green
+        textGradient.addColorStop(0.5, 'rgba(241, 196, 15, 1)'); // Yellow
+        textGradient.addColorStop(1, 'rgba(231, 76, 60, 1)');    // Red
+        return textGradient;
+    }
+}

@@ -1,0 +1,71 @@
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+const players = {};
+
+io.on('connection', (socket) => {
+  console.log('New player connected');
+
+  // Регистрация нового игрока
+  socket.on('register', (playerName) => {
+    players[socket.id] = {
+      id: socket.id,
+      name: playerName,
+      health: 100,
+      damage: 10
+    };
+
+    // Уведомляем всех о новом игроке
+    io.emit('playerList', Object.values(players));
+  });
+
+  // Вызов на поединок
+  socket.on('challengePlayer', (targetPlayerId) => {
+    io.to(targetPlayerId).emit('challengeReceived', {
+      challengerId: socket.id,
+      challengerName: players[socket.id].name
+    });
+  });
+
+  // Принятие вызова
+  socket.on('acceptChallenge', (challengerId) => {
+    const battleRoom = `battle_${challengerId}_${socket.id}`;
+
+    // Помещаем игроков в комнату боя
+    io.to(challengerId).to(socket.id).emit('startBattle', {
+      room: battleRoom,
+      players: [
+        players[challengerId],
+        players[socket.id]
+      ]
+    });
+  });
+
+  // Обработка атаки
+  socket.on('attack', (data) => {
+    const damage = Math.floor(Math.random() * 20) + 5;
+    io.to(data.targetId).emit('takeDamage', {
+      damage: damage,
+      attackerId: socket.id
+    });
+  });
+
+  // Отключение игрока
+  socket.on('disconnect', () => {
+    delete players[socket.id];
+    io.emit('playerList', Object.values(players));
+  });
+});
+
+// Статические файлы
+app.use(express.static('public'));
+
+const PORT = 3000;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});

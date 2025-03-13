@@ -1,0 +1,150 @@
+const io = require('socket.io')(server);
+
+const rooms = {};
+
+io.on('connection', (socket) => {
+    socket.on('createRoom', (data) => {
+        const { roomName, playerName } = data;
+
+        if (rooms[roomName]) {
+            socket.emit('roomCreated', {
+                success: false,
+                message: 'Room already exists'
+            });
+        } else {
+            rooms[roomName] = {
+                players: [{
+                    id: socket.id,
+                    name: playerName,
+                    ready: false
+                }],
+                maxPlayers: 4
+            };
+
+            socket.join(roomName);
+            socket.emit('roomCreated', {
+                success: true,
+                roomName,
+                players: rooms[roomName].players
+            });
+        }
+    });
+    socket.on('joinRoom', (data) => {
+        const { roomName, playerName } = data;
+
+        if (rooms[roomName]) {
+            if (rooms[roomName].players.length < 4) {
+                // Add new player to the room
+                const newPlayer = {
+                    id: socket.id,
+                    name: playerName,
+                    ready: false
+                };
+
+                rooms[roomName].players.push(newPlayer);
+                socket.join(roomName);
+
+                // Notify all players in the room about the new player
+                io.to(roomName).emit('playerJoined', {
+                    roomName,
+                    players: rooms[roomName].players
+                });
+
+                // Send success response to the joining player
+                socket.emit('roomJoined', {
+                    success: true,
+                    roomName,
+                    players: rooms[roomName].players
+                });
+            } else {
+                // Room is full
+                socket.emit('roomJoined', {
+                    success: false,
+                    message: 'Room is full'
+                });
+            }
+        } else {
+            // Room doesn't exist
+            socket.emit('roomJoined', {
+                success: false,
+                message: 'Room does not exist'
+            });
+        }
+    });
+
+    socket.on('playerReady', (data) => {
+        const { roomName, playerName } = data;
+
+        if (rooms[roomName]) {
+            // Find the player and mark as ready
+            const player = rooms[roomName].players.find(p => p.name === playerName);
+            if (player) {
+                player.ready = true;
+
+                // Check if all players are ready
+                const allPlayersReady = rooms[roomName].players.every(p => p.ready);
+
+                // Broadcast player ready status
+                io.to(roomName).emit('playerReady', {
+                    roomName,
+                    players: rooms[roomName].players
+                });
+
+                // If all players are ready, start the game
+                if (allPlayersReady) {
+                    io.to(roomName).emit('gameStart', {
+                        roomName,
+                        players: rooms[roomName].players
+                    });
+                }
+            }
+        }
+    });
+
+    socket.on('leaveRoom', (data) => {
+        const { roomName, playerName } = data;
+
+        if (rooms[roomName]) {
+            // Remove player from the room
+            rooms[roomName].players = rooms[roomName].players.filter(p => p.name !== playerName);
+
+            // If room is empty, delete the room
+            if (rooms[roomName].players.length === 0) {
+                delete rooms[roomName];
+            } else {
+                // Notify remaining players
+                io.to(roomName).emit('playerLeft', {
+                    roomName,
+                    players: rooms[roomName].players
+                });
+            }
+
+            // Make the socket leave the room
+            socket.leave(roomName);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        // Handle player disconnection
+        for (let roomName in rooms) {
+            const roomPlayers = rooms[roomName].players;
+            const disconnectedPlayerIndex = roomPlayers.findIndex(p => p.id === socket.id);
+
+            if (disconnectedPlayerIndex !== -1) {
+                // Remove disconnected player
+                roomPlayers.splice(disconnectedPlayerIndex, 1);
+
+                // Notify remaining players
+                io.to(roomName).emit('playerLeft', {
+                    roomName,
+                    players: roomPlayers
+                });
+
+                // If room is empty, delete it
+                if (roomPlayers.length === 0) {
+                    delete rooms[roomName];
+                }
+            }
+        }
+    });
+});

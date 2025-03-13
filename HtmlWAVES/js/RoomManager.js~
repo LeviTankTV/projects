@@ -1,0 +1,123 @@
+export class RoomManager {
+    constructor() {
+        this.socket = null;
+        this.currentRoom = null;
+        this.initializeUI();
+    }
+
+    initializeUI() {
+        const createRoomBtn = document.getElementById('create-room-btn');
+        const joinRoomBtn = document.getElementById('join-room-btn');
+        const multiplayerModal = document.getElementById('multiplayer-modal');
+        const closeModalBtn = multiplayerModal.querySelector('.close-modal');
+
+        createRoomBtn.addEventListener('click', () => this.showCreateRoomModal());
+        joinRoomBtn.addEventListener('click', () => this.showJoinRoomModal());
+        closeModalBtn.addEventListener('click', () => {
+            multiplayerModal.style.display = 'none';
+        });
+    }
+
+    connectToMultiplayer() {
+        this.socket = io('http://your-server-url:3000');
+
+        this.socket.on('connect', () => {
+            console.log('Connected to multiplayer server');
+            this.showMultiplayerButtons();
+        });
+
+        // Room creation and joining event listeners
+        this.socket.on('roomCreated', this.handleRoomCreation.bind(this));
+        this.socket.on('roomJoined', this.handleRoomJoining.bind(this));
+        this.socket.on('playerJoined', this.updatePlayerList.bind(this));
+        this.socket.on('roomAvailable', this.handleRoomAvailability.bind(this));
+    }
+
+    showCreateRoomModal() {
+        const modalContent = document.getElementById('room-content');
+        modalContent.innerHTML = `
+            <h2>Create Room</h2>
+            <input 
+                type="text" 
+                id="room-name-input" 
+                placeholder="Enter Unique Room Name"
+                maxlength="20"
+            >
+            <button id="confirm-create-room">Create Room</button>
+            <div id="room-create-error" style="color: red;"></div>
+        `;
+
+        const confirmCreateBtn = modalContent.querySelector('#confirm-create-room');
+        const roomNameInput = modalContent.querySelector('#room-name-input');
+        const errorDiv = modalContent.querySelector('#room-create-error');
+
+        confirmCreateBtn.addEventListener('click', () => {
+            const roomName = roomNameInput.value.trim();
+            const playerName = document.getElementById('player-name').value.trim();
+
+            if (!roomName) {
+                errorDiv.textContent = 'Room name cannot be empty';
+                return;
+            }
+
+            if (!playerName) {
+                errorDiv.textContent = 'Please enter your name first';
+                return;
+            }
+
+            this.socket.emit('createRoom', { roomName, playerName });
+        });
+
+        document.getElementById('multiplayer-modal').style.display = 'block';
+    }
+
+    showJoinRoomModal() {
+        const modalContent = document.getElementById('room-content');
+        modalContent.innerHTML = `
+            <h2>Join Room</h2>
+            <input 
+                type="text" 
+                id="join-room-input" 
+                placeholder="Enter Room Name"
+                maxlength="20"
+            >
+            <button id="confirm-join-room">Join Room</button>
+            <div id="room-join-error" style="color: red;"></div>
+        `;
+
+        const confirmJoinBtn = modalContent.querySelector('#confirm-join-room');
+        const roomNameInput = modalContent.querySelector('#join-room-input');
+        const errorDiv = modalContent.querySelector('#room-join-error');
+
+        confirmJoinBtn.addEventListener('click', () => {
+            const roomName = roomNameInput.value.trim();
+            const playerName = document.getElementById('player-name').value.trim();
+
+            if (!roomName) {
+                errorDiv.textContent = 'Room name cannot be empty';
+                return;
+            }
+
+            if (!playerName) {
+                errorDiv.textContent = 'Please enter your name first';
+                return;
+            }
+
+            this.socket.emit('joinRoom', { roomName, playerName });
+        });
+
+        document.getElementById('multiplayer-modal').style.display = 'block';
+    }
+
+    handleRoomCreation(roomData) {
+        const errorDiv = document.getElementById('room-create-error');
+
+        if (roomData.success) {
+            this.currentRoom = roomData.roomName;
+            this.showWaitingRoom(roomData);
+            errorDiv.textContent = ''; // Clear any previous errors
+        } else {
+            errorDiv.textContent = roomData.message;
+        }
+    }
+    

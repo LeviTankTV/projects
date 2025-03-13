@@ -1,0 +1,128 @@
+import {WorldMap} from "./biome.js";
+import {Camera} from "./camera.js";
+import {Player} from "./player.js";
+
+document.addEventListener('localGameStart', (event) => {
+    const playerName = event.detail.playerName;
+
+    // Clear all UI elements
+    const uiElements = [
+        '.start-container',
+        '.theme-selector',
+        '#theme-pointer',
+        '.game-mode-container', // Add this if your game mode buttons are in a container
+        '#biome-info',
+        '.animated-title'
+    ];
+
+    uiElements.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.remove();
+        }
+    });
+
+    // Remove any existing overlays or modal screens
+    const overlays = document.querySelectorAll('[data-overlay="true"]');
+    overlays.forEach(overlay => overlay.remove());
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Make canvas full screen and remove any margins/paddings
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.margin = '0';
+    canvas.style.padding = '0';
+    canvas.style.zIndex = '10';
+
+    // Ensure body has no margins
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.overflow = 'hidden';
+
+    const WORLD_WIDTH = 5000;
+    const WORLD_HEIGHT = 5000;
+    const worldMap = new WorldMap(WORLD_WIDTH, WORLD_HEIGHT);
+    const camera = new Camera(canvas, WORLD_WIDTH, WORLD_HEIGHT);
+    const player = new Player(WORLD_WIDTH / 2 - 25, WORLD_HEIGHT / 2 - 25, worldMap);
+
+    // Set player name
+    player.name = playerName;
+
+    let isGameRunning = true;
+
+    function gameLoop() {
+        // Clear canvas
+        camera.ctx.clearRect(0, 0, camera.width, camera.height);
+
+        // Update player movement
+        player.updateMovement();
+
+        // Begin camera rendering
+        camera.begin();
+
+        // Render world map
+        worldMap.renderWorld(camera.ctx);
+
+        // Draw player
+        player.draw(camera.ctx);
+
+        // End camera rendering
+        camera.end();
+
+        // Center camera on player
+        camera.follow(player);
+
+        // Continue game loop
+        if (isGameRunning) {
+            requestAnimationFrame(gameLoop);
+        }
+    }
+
+    // Optional: Add game end functionality
+    function endGame() {
+        isGameRunning = false;
+
+        // Reset UI or show game over screen
+        const gameOverScreen = document.createElement('div');
+        gameOverScreen.style.position = 'fixed';
+        gameOverScreen.style.top = '0';
+        gameOverScreen.style.left = '0';
+        gameOverScreen.style.width = '100%';
+        gameOverScreen.style.height = '100%';
+        gameOverScreen.style.background = 'rgba(0,0,0,0.8)';
+        gameOverScreen.style.display = 'flex';
+        gameOverScreen.style.justifyContent = 'center';
+        gameOverScreen.style.alignItems = 'center';
+        gameOverScreen.style.color = 'white';
+        gameOverScreen.style.fontFamily = "'Orbitron', sans-serif";
+        gameOverScreen.setAttribute('data-overlay', 'true');
+        gameOverScreen.innerHTML = `
+            <div style="text-align: center;">
+                <h1>Game Over</h1>
+                <p>Player: ${playerName}</p>
+                <button id="restart-btn">Restart</button>
+            </div>
+        `;
+        document.body.appendChild(gameOverScreen);
+
+        // Restart button functionality
+        const restartBtn = gameOverScreen.querySelector('#restart-btn');
+        restartBtn.addEventListener('click', () => {
+            gameOverScreen.remove();
+
+            // Dispatch event to restart game or return to main menu
+            const restartEvent = new CustomEvent('gameRestart');
+            document.dispatchEvent(restartEvent);
+        });
+    }
+
+    // Start game loop immediately
+    gameLoop();
+});

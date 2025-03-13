@@ -1,0 +1,215 @@
+const canvas = document.getElementById('arena');
+const ctx = canvas.getContext('2d');
+
+// Load the player sprite
+const playerSprite = new Image();
+playerSprite.src = 'res/pl.png'; // Replace with the path to your custom sprite
+
+// Petal Class
+class Petal {
+    constructor(color, radius) {
+        this.color = color;
+        this.radius = radius;
+        this.angle = 0;
+        this.active = false;
+    }
+
+    draw(x, y, mode) {
+        let orbitRadius;
+
+        // Determine orbit radius based on mode
+        switch (mode) {
+            case 'passive':
+                orbitRadius = 30; // Close to player
+                break;
+            case 'attack':
+                orbitRadius = 60; // Further from player
+                break;
+            case 'defense':
+                orbitRadius = 10; // Very close to player
+                break;
+            default:
+                orbitRadius = 30; // Default to passive
+        }
+
+        const petalX = x + orbitRadius * Math.cos(this.angle);
+        const petalY = y + orbitRadius * Math.sin(this.angle);
+        ctx.beginPath();
+        ctx.arc(petalX, petalY, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        this.angle += 0.05; // Adjust this value to change the speed of orbiting
+    }
+}
+
+// Player Class
+class Player {
+    constructor(x, y, radius, speed) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.speed = speed;
+        this.weapons = []; // Array to store active petals
+        this.mode = 'passive'; // Default mode
+    }
+
+    draw() {
+        ctx.drawImage(playerSprite, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+    }
+
+    update(keys) {
+        // Calculate the distance from the center of the arena
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const maxDistance = 300 - this.radius; // Maximum distance from the center
+
+        // Update player position based on key presses
+        if (keys['w']) {
+            this.y -= this.speed; // Move up
+        }
+        if (keys['s']) {
+            this.y += this.speed; // Move down
+        }
+        if (keys['a']) {
+            this.x -= this.speed; // Move left
+        }
+        if (keys['d']) {
+            this.x += this.speed; // Move right
+        }
+
+        // Calculate the distance from the center
+        const distanceFromCenter = Math.sqrt((this.x - centerX) ** 2 + (this.y - centerY) ** 2);
+
+        // Check if the player is outside the circular arena
+        if (distanceFromCenter > maxDistance) {
+            const angle = Math.atan2(this.y - centerY, this.x - centerX);
+            this.x = centerX + Math.cos(angle) * maxDistance;
+            this.y = centerY + Math.sin(angle) * maxDistance;
+        }
+    }
+
+    toggleMode() {
+        // Toggle between modes
+        if (this.mode === 'passive') {
+            this.mode = 'attack';
+        } else if (this.mode === 'attack') {
+            this.mode = 'defense';
+        } else {
+            this.mode = 'passive';
+        }
+    }
+}
+
+// Instantiate player
+const player = new Player(canvas.width / 2, canvas.height / 2, 20, 5);
+
+// Define available petals
+const petals = [
+    new Petal('red', 10),
+    new Petal('blue', 10),
+    new Petal('green', 10),
+    new Petal('yellow', 10),
+    new Petal('purple', 10)
+];
+
+// Key states
+const keys = {};
+
+// Event listeners for key presses
+window.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+
+    // Toggle mode on spacebar
+    if (e.key === ' ') {
+        player.toggleMode();
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+});
+
+// Event listener for mouse clicks
+canvas.addEventListener('click', (e) => {
+    const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+    const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+    selectPetal(mouseX, mouseY);
+});
+
+// Function to draw the circular arena
+function drawArena() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw circular arena
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, 300, 0, Math.PI * 2);
+    ctx.fillStyle = '#e0e0e0';
+    ctx.fill();
+    ctx.stroke();
+}
+
+// Function to select a petal
+function selectPetal(mouseX, mouseY) {
+    const squareSize = 50; // Size of the weapon squares
+    const startX = (canvas.width - (squareSize * petals.length)) / 2; // Center the squares
+    const startY = canvas.height - 100; // Position from the bottom
+
+    for (let i = 0; i < petals.length; i++) {
+        const x = startX + i * squareSize;
+        const y = startY;
+
+        // Check if the mouse is inside the square
+        if (mouseX >= x && mouseX <= x + squareSize && mouseY >= y && mouseY <= y + squareSize) {
+            petals[i].active = !petals[i].active; // Toggle petal active state
+            if (petals[i].active) {
+                player.weapons.push(petals[i]); // Add petal to player's active weapons
+            } else {
+                player.weapons = player.weapons.filter(p => p !== petals[i]); // Remove petal from player's active weapons
+            }
+        }
+    }
+}
+
+// Function to draw weapon selection squares
+function drawPetalSelection() {
+    const squareSize = 50; // Size of the weapon squares
+    const startX = (canvas.width - (squareSize * petals.length)) / 2; // Center the squares
+    const startY = canvas.height - 100; // Position from the bottom
+
+    petals.forEach((petal, index) => {
+        const x = startX + index * squareSize;
+        const y = startY;
+
+        ctx.fillStyle = petal.active ? 'lightgray' : 'white'; // Change color if active
+        ctx.fillRect(x, y, squareSize, squareSize);
+        ctx.strokeRect(x, y, squareSize, squareSize); // Draw border
+
+        // Draw petal color inside the square
+        ctx.fillStyle = petal.color;
+        ctx.fillRect(x + 5, y + 5, squareSize - 10, squareSize - 10); // Draw inner square
+    });
+}
+
+// Function to draw active petals
+function drawActivePetals() {
+    player.weapons.forEach(petal => {
+        if (petal.active) {
+            petal.draw(player.x, player.y, player.mode);
+        }
+    });
+}
+
+// Main game loop
+function gameLoop() {
+    player.update(keys);
+    drawArena();
+    player.draw();
+    drawActivePetals();
+    drawPetalSelection();
+    requestAnimationFrame(gameLoop);
+}
+
+// Start the game loop
+playerSprite.onload = () => {
+    gameLoop(); // Start the loop only after the sprite is loaded
+};

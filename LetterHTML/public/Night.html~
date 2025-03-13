@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Night</title>
+    <link rel="stylesheet" href="Night.css">
+</head>
+<body>
+<div class="dark-screen" id="darkScreen">
+    <h1 id="nightText"></h1>
+    <p id="letterCountText"></p>
+</div>
+<div id="gameRoom" class="hidden">
+    <div id="player"></div>
+    <div id="letterMachine" class="letterMachine"></div>
+    <div id="itemMachine" class="itemMachine"></div>
+    <div id="LetterZone" class="letterZone"></div>
+
+    <!-- Room Text Display -->
+    <div id="roomText" class="room-text">Текущая Комната: C-R</div>
+
+    <!-- Inventory Hotbars -->
+    <div id="inventoryHotbar" class="inventory-hotbar">
+        <div class="hotbar-item" id="hotbarItem1"></div>
+        <div class="hotbar-item" id="hotbarItem2"></div>
+        <div class="hotbar-item" id="hotbarItem3"></div>
+    </div>
+
+    <div id="LetterText" class="LetterText">Количество доставленных писем:</div>
+
+    <div id="exit" class="exit">Exit</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+<script src="night/Night.js"></script>
+<script src="night/Item.js"></script>
+<script src="night/Inventory.js"></script>
+<script src="night/game.js"></script>
+</body>
+</html>

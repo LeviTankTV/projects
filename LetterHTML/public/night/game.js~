@@ -1,0 +1,200 @@
+class Game {
+    constructor(nightNumber) {
+        this.nightNumber = nightNumber;
+        this.inventory = new Inventory();
+        this.playerPosition = { x: 25, y: -370 };
+        this.movement = { up: false, down: false, left: false, right: false };
+        this.speed = 5; // Скорость движения игрока
+    }
+
+    start() {
+        console.log('Game started!' + ' ' + this.nightNumber);
+        this.showGameRoom();
+        this.setupControls();
+        this.gameLoop(); // Запуск игрового цикла
+    }
+
+    showGameRoom() {
+        document.getElementById('darkScreen').style.display = 'none'; // Hide the dark screen
+        document.getElementById('gameRoom').classList.remove('hidden'); // Show the game room
+        this.updateInventoryDisplay();
+    }
+
+    setupControls() {
+        window.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'w':
+                case 'ArrowUp':
+                    this.movement.up = true;
+                    break;
+                case 's':
+                case 'ArrowDown':
+                    this.movement.down = true;
+                    break;
+                case 'a':
+                case 'ArrowLeft':
+                    this.movement.left = true;
+                    break;
+                case 'd':
+                case 'ArrowRight':
+                    this.movement.right = true;
+                    break;
+                case 'e': // Interact with machines
+                    this.interactWithMachines();
+                    break;
+                case 'Escape': // Exit the room
+                    this.exitRoom();
+                    break;
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            switch (event.key) {
+                case 'w':
+                case 'ArrowUp':
+                    this.movement.up = false;
+                    break;
+                case 's':
+                case 'ArrowDown':
+                    this.movement.down = false;
+                    break;
+                case 'a':
+                case 'ArrowLeft':
+                    this.movement.left = false;
+                    break;
+                case 'd':
+                case 'ArrowRight':
+                    this.movement.right = false;
+                    break;
+            }
+        });
+    }
+
+    gameLoop() {
+        this.updatePlayerPosition();
+        console.log(this.playerPosition.x, this.playerPosition.y);
+        requestAnimationFrame(() => this.gameLoop()); // Запускаем следующий кадр
+    }
+
+    updatePlayerPosition() {
+        // Получаем размеры окна
+        const windowWidth = window.innerWidth;
+
+        // Получаем размеры игрока
+        const playerElement = document.getElementById('player');
+
+        // Проверяем границы для движения вверх
+        if (this.movement.up) {
+            if (this.playerPosition.y - this.speed >= -665) {
+                this.playerPosition.y -= this.speed;
+            } else {
+                this.playerPosition.y = -665; // Не позволяем выходить за верхнюю границу
+            }
+        }
+
+        // Проверяем границы для движения вниз
+        if (this.movement.down) {
+            if (this.playerPosition.y + this.speed <= -100) {
+                this.playerPosition.y += this.speed;
+            } else {
+                this.playerPosition.y = -100; // Не позволяем выходить за нижнюю границу
+            }
+        }
+
+        // Проверяем границы для движения влево
+        if (this.movement.left) {
+            if (this.playerPosition.x - this.speed >= 0) {
+                this.playerPosition.x -= this.speed;
+            } else {
+                this.playerPosition.x = 0; // Не позволяем выходить за левую границу
+            }
+        }
+
+        // Проверяем границы для движения вправо
+        if (this.movement.right) {
+            if (this.playerPosition.x + this.speed + playerElement.offsetWidth <= windowWidth - 50) {
+                this.playerPosition.x += this.speed;
+            } else {
+                this.playerPosition.x = windowWidth - playerElement.offsetWidth - 50; // Не позволяем выходить за правую границу
+            }
+        }
+
+        // Обновляем позицию игрока
+        playerElement.style.transform = `translate(${this.playerPosition.x}px, ${this.playerPosition.y}px)`;
+    }
+
+    interactWithMachines() {
+        const letterMachine = document.getElementById('letterMachine');
+        const itemMachine = document.getElementById('itemMachine');
+
+        const playerRect = document.getElementById('player').getBoundingClientRect();
+        const letterMachineRect = letterMachine.getBoundingClientRect();
+        const itemMachineRect = itemMachine.getBoundingClientRect();
+
+        // Check for proximity to letter machine
+        if (this.checkCollision(playerRect, letterMachineRect)) {
+            const letter = new Item('Letter', 'A letter from the factory');
+            this.inventory.addLetter(letter);
+            if (this.inventory.addLetter(letter)) {
+                this.updateInventoryDisplay();
+                console.log('Added a letter to inventory!');
+            } else {
+                console.log('Inventory full! Cannot add more letters.');
+            }
+        }
+
+        // Check for proximity to item machine
+        if (this.checkCollision(playerRect, itemMachineRect)) {
+            const randomItem = new Item('Random Item', 'A random item from the machine');
+            this.inventory.addItem(randomItem);
+            this.updateInventoryDisplay();
+            console.log('Added an item to inventory!');
+        }
+    }
+
+    checkCollision(rect1, rect2) {
+        return !(rect1.right < rect2.left ||
+            rect1.left > rect2.right ||
+            rect1.bottom < rect2.top ||
+            rect1.top > rect2.bottom);
+    }
+
+    updateInventoryDisplay() {
+        const letters = this.inventory.getLetters();
+        const item = this.inventory.getItem();
+
+        // Update letters in the hotbar
+        const hotbarItem1 = document.getElementById('hotbarItem1');
+        const hotbarItem2 = document.getElementById('hotbarItem2');
+
+        // Set background images based on letters in inventory
+        if (letters[0]) {
+            hotbarItem1.style.backgroundImage = `url('res/letter.png')`; // Path to your letter image
+            hotbarItem1.style.backgroundSize = 'cover'; // Ensure it covers the hotbar item
+        } else {
+            hotbarItem1.style.backgroundImage = 'none'; // Clear if no letter
+        }
+
+        if (letters[1]) {
+            hotbarItem2.style.backgroundImage = `url('res/letter.png')`; // Path to your letter image
+            hotbarItem2.style.backgroundSize = 'cover'; // Ensure it covers the hotbar item
+        } else {
+            hotbarItem2.style.backgroundImage = 'none'; // Clear if no letter
+        }
+
+        // Update the item in the hotbar (third position)
+        const itemHotbar = document.getElementById('hotbarItem3');
+        if (item) {
+            itemHotbar.style.backgroundImage = `url('images/item.png')`; // Path to your item image
+            itemHotbar.style.backgroundSize = 'cover'; // Ensure it covers the hotbar item
+        } else {
+            itemHotbar.style.backgroundImage = 'none'; // Clear the background if no item
+        }
+    }
+
+    exitRoom() {
+        console.log('Exiting to corridor...');
+        // Logic to transition to the corridor scene
+    }
+}
+

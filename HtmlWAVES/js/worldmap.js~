@@ -1,0 +1,56 @@
+class WorldMap {
+    constructor(width, height) {
+        this.width = width;
+        this.height = height;
+        this.biomes = this.createBiomes();
+        this.biomeMap = this.generateBiomeMap();
+    }
+
+    createBiomes() {
+        return {
+            forest: new Biome('forest', '#228B22', 0.7),     // Green Forest
+            desert: new Biome('desert', '#F4A460', 0.4),     // Sandy Desert
+            tundra: new Biome('tundra', '#87CEEB', 0.6),     // Icy Tundra
+            mountain: new Biome('mountain', '#8B4513', 0.9)  // Rocky Mountains
+        };
+    }
+
+    generateBiomeMap() {
+        const biomeMap = new Array(this.width).fill().map(() =>
+            new Array(this.height).fill(null)
+        );
+
+        // Divide world into quadrants
+        const halfWidth = Math.floor(this.width / 2);
+        const halfHeight = Math.floor(this.height / 2);
+
+        // Assign biomes to quadrants with smooth transitions
+        const biomeTypes = Object.values(this.biomes);
+
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                const quadrantX = x < halfWidth ? 0 : 1;
+                const quadrantY = y < halfHeight ? 0 : 1;
+
+                const biomeIndex = quadrantX + quadrantY * 2;
+                biomeMap[x][y] = biomeTypes[biomeIndex];
+            }
+        }
+
+        // Generate noise for each biome
+        Object.values(this.biomes).forEach(biome => {
+            biome.generateNoiseMap(this.width, this.height);
+        });
+
+        return biomeMap;
+    }
+
+    renderWorld(ctx) {
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                const biome = this.biomeMap[x][y];
+                biome.render(ctx, x, y, 1, 1);
+            }
+        }
+    }
+}

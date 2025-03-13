@@ -1,0 +1,15 @@
+// Set wave to 24
+setWave(24)
+
+// Check current wave
+getCurrentWave()
+
+// Reset to wave 1
+resetWave()
+
+// Spawn a specific mob
+spawnMob('Bee', 'legendary')
+spawnMob('SuperBee', 'ultra')
+
+// Spawn a random mob
+spawnRandomMob()

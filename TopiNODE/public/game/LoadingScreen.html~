@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading Topi</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(270deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+            animation: gradientAnimation 5s ease infinite;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .loading-icon {
+            width: 100px;
+            height: 100px;
+            fill: var(--text-color);
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="loading-container">
+    <svg class="loading-icon" viewBox="0 0 100 100">
+        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+    </svg>
+    <h1>Loading Topi</h1>
+</div>
+
+<script>
+    setTimeout(() => {
+        document.body.innerHTML = ''; // Clear the loading screen
+        const mainMenu = document.createElement('div');
+        mainMenu.id = 'main-menu';
+        document.body.appendChild(mainMenu);
+        const script = document.createElement('script');
+        script.src = 'MainMenuInteractions.js';
+        script.type = 'module';
+        document.body.appendChild(script);
+        const style = document.createElement('link');
+        style.rel = 'stylesheet';
+        style.type = 'text/css';
+        style.href = 'MainMenuInteractions.css';
+        document.head.appendChild(style);
+    }, 3000); // Set the desired loading time (3000ms = 3 seconds)
+</script>
+</body>
+</html>

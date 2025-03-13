@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Hell</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="loading-screen" id="loadingScreen">
+    Click Me
+</div>
+<div class="menu">
+    <h1>Адская Фабрика</h1>
+    <button id="newGameButton">Новая Игра</button>
+    <button id="nightContinueButton" class="hide">Продолжить</button>
+</div>
+<div class="newspaper" id="newspaper">
+    <h2>Выписка из газеты</h2>
+    <p>Завод «Письмоград», ведущее предприятие по производству писем, объявляет набор сотрудников для работы в ночные смены! Оплата почасовая в конце недели.</p>
+    <p>Вы решили, что эта работа подходит вам и взяли эту вакансию. Вы заходите на завод и начинаете свою первую ночь.</p>
+    <button id="continueButton" class="hide">Продолжить</button>
+</div>
+<audio id="menuMusic" src="res/glitch.mp3" loop autoplay></audio>
+<audio id="newspaperMusic" src="res/newspaper.mp3" loop></audio>
+<script src="menu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+</body>
+</html>

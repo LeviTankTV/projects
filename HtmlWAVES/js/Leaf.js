@@ -1,0 +1,193 @@
+import { Petal } from './Petal.js';
+
+export class LeafPetal extends Petal {
+    constructor(rarity = 'common') {
+        const color = '#2ecc71'; // Green color for leaf
+        let radius = 10; // Base radius
+
+        // Adjust radius based on rarity
+        if (['common', 'uncommon'].includes(rarity)) {
+            radius *= 0.75;
+        } else if (['rare', 'epic'].includes(rarity)) {
+            radius *= 1;
+        } else if (['legendary', 'mythic'].includes(rarity)) {
+            radius *= 1.25;
+        } else if (['ultra', 'super'].includes(rarity)) {
+            radius *= 1.5;
+        }
+
+        super(color, radius, 'leaf', true, null, rarity);
+
+        // Load image
+        this.image = new Image();
+        this.image.src = 'res/leafPetal.png';
+        this.image.onerror = () => {
+            console.error('Failed to load Leaf Petal image');
+        };
+
+        // Passive healing configuration
+        this.passiveHealRates = {
+            'common': 0.01,
+            'uncommon': 0.03,
+            'rare': 0.05,
+            'epic': 0.07,
+            'legendary': 0.1,
+            'mythic': 0.15,
+            'ultra': 0.3,
+            'super': 0.5
+        };
+
+        // Recharge time configuration
+        this.rechargeTimeByRarity = {
+            'common': 5000,
+            'uncommon': 5000,
+            'rare': 5000,
+            'epic': 5000,
+            'legendary': 5000,
+            'mythic': 5000,
+            'ultra': 5000,
+            'super': 5000
+        };
+
+        // Override recharge time
+        this.rechargeTime = this.rechargeTimeByRarity[rarity] || 10000;
+
+        // Passive heal rate
+        this.passiveHealRate = this.passiveHealRates[rarity] || 0.5;
+    }
+
+    calculateMaxHP() {
+        const healthMap = {
+            'common': 20,
+            'uncommon': 30,
+            'rare': 40,
+            'epic': 50,
+            'legendary': 60,
+            'mythic': 75,
+            'ultra': 90,
+            'super': 100
+        };
+        return healthMap[this.rarity] || 20;
+    }
+
+    calculateDamage() {
+        // Leaf petals are more focused on healing, so low damage
+        const damageMap = {
+            'common': 10,
+            'uncommon': 20,
+            'rare': 30,
+            'epic': 40,
+            'legendary': 50,
+            'mythic': 60,
+            'ultra': 75,
+            'super': 100
+        };
+        return damageMap[this.rarity] || 10;
+    }
+
+    update(centerX, centerY, orbitRadius, angle) {
+        super.update(centerX, centerY, orbitRadius, angle);
+
+        // Passive healing logic
+        if (this.player && !this.isRecharging) {
+            this.passiveHeal();
+        }
+    }
+
+    passiveHeal() {
+        if (this.player) {
+            const healAmount = this.passiveHealRate;
+            this.player.heal(healAmount);
+        }
+    }
+
+    draw(ctx) {
+        // Modify drawing to show recharge state and use image
+        if (this.isRecharging) {
+            ctx.globalAlpha = 0.3; // Semi-transparent when recharging
+        }
+
+        // Only draw if not completely invisible
+        if (this.currentDistance > 0) {
+            ctx.save();
+
+            // Check if image is loaded
+            if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
+                // Draw image
+                ctx.translate(this.x, this.y);
+                ctx.drawImage(
+                    this.image,
+                    -this.radius,
+                    -this.radius,
+                    this.radius * 2,
+                    this.radius * 2
+                );
+            } else {
+                // Fallback to drawing a leaf-like shape
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.quadraticCurveTo(
+                    this.x + this.radius,
+                    this.y - this.radius,
+                    this.x + this.radius,
+                    this.y
+                );
+                ctx.quadraticCurveTo(
+                    this.x + this.radius,
+                    this.y + this.radius,
+                    this.x,
+                    this.y
+                );
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        ctx.globalAlpha = 1; // Reset alpha
+    }
+
+    checkCollisionWithMob(mob) {
+        const dx = this.x - mob.x;
+        const dy = this.y - mob.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        return distance < (this.radius + mob.size);
+    }
+    dealDamageToMob(mob) {
+        if (this.isRecharging) return false;
+
+        // Leaf petals do minimal damage but have healing properties
+        const damageAmount = this.damage;
+        mob.takeDamage(damageAmount);
+
+        // Slight self-healing when dealing damage
+        if (this.player) {
+            const healAmount = this.passiveHealRate * 2; // Slightly more healing on damage
+            this.player.heal(healAmount);
+        }
+
+        // Reduce petal HP gradually
+        this.currentHP -= Math.max(mob.health * 0.1, 1);
+
+        // Recharge when HP reaches 0
+        if (this.currentHP <= 0) {
+            this.destroy();
+            return true; // Indicate petal is recharging
+        }
+
+        return false;
+    }
+    // Optional: On add to player method to set up initial healing
+    onAddToPlayer(player) {
+        super.onAddToPlayer(player);
+        this.player = player;
+    }
+
+    // Optional: On remove from player method to clean up
+    onRemoveFromPlayer() {
+        this.player = null;
+        super.onRemoveFromPlayer();
+    }
+}

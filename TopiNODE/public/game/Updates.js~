@@ -1,0 +1,58 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const updatesButton = document.getElementById('updates-icon');
+    const updatesList = document.getElementById('updates-list');
+    const updatesContent = document.getElementById('updates-content');
+
+    // Sample updates
+    const updates = [
+        'Version 0.1: ',
+        '- Added authentication system',
+        '- Improved user interface',
+        '- Fixed bugs and performance issues',
+        '- Enhanced game mechanics',
+        '- Added new levels and challenges',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations','- Updated graphics and animations','- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations','- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations','- Updated graphics and animations','- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations','- Updated graphics and animations',
+        '- Updated graphics and animations',
+        '- Updated graphics and animations',
+        
+
+
+
+
+
+
+
+
+
+    ];
+
+    // Function to toggle the updates list visibility
+    updatesButton.addEventListener('click', () => {
+        updatesList.style.display = updatesList.style.display === 'none' || updatesList.style.display === '' ? 'block' : 'none';
+
+        // Clear existing updates
+        updatesContent.innerHTML = '';
+
+        // Populate the updates list
+        updates.forEach(update => {
+            const li = document.createElement('li');
+            li.textContent = update;
+            updatesContent.appendChild(li);
+        });
+    });
+});

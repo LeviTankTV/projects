@@ -1,0 +1,80 @@
+// mobBehavior.js
+export class MobBehavior {
+    static BEHAVIORS = {
+        PASSIVE: 'passive',        // Just exist, no interaction
+        AGGRESSIVE: 'aggressive',  // Attack on sight
+        DEFENSIVE: 'defensive',    // Attack when attacked
+        BOSS: 'boss',              // Special boss behavior
+        SPAWNER: 'spawner'         // Generates other mobs
+    }
+
+    static RARITIES = {
+        COMMON: {
+            multiplier: 1,
+            color: '#FFFFFF',      // White
+            dropChanceMultiplier: 1
+        },
+        UNCOMMON: {
+            multiplier: 1.5,
+            color: '#00FF00',      // Green
+            dropChanceMultiplier: 1.5
+        },
+        RARE: {
+            multiplier: 2,
+            color: '#0000FF',      // Blue
+            dropChanceMultiplier: 2
+        },
+        EPIC: {
+            multiplier: 3,
+            color: '#800080',      // Purple
+            dropChanceMultiplier: 3
+        },
+        LEGENDARY: {
+            multiplier: 4,
+            color: '#FFD700',      // Gold
+            dropChanceMultiplier: 4
+        },
+        MYTHIC: {
+            multiplier: 5,
+            color: '#FF4500',      // Orange-Red
+            dropChanceMultiplier: 5
+        },
+        ULTRA: {
+            multiplier: 6,
+            color: '#FF00FF',      // Magenta
+            dropChanceMultiplier: 6
+        },
+        SUPER: {
+            multiplier: 7,
+            color: '#00FFFF',      // Cyan
+            dropChanceMultiplier: 7
+        }
+    }
+
+    constructor(type = MobBehavior.BEHAVIORS.PASSIVE) {
+        this.type = type;
+    }
+
+    // Behavior-specific methods
+    shouldAttack(mob, target) {
+        switch(this.type) {
+            case MobBehavior.BEHAVIORS.PASSIVE:
+                return false;
+            case MobBehavior.BEHAVIORS.AGGRESSIVE:
+                return this.isTargetInRange(mob, target);
+            case MobBehavior.BEHAVIORS.DEFENSIVE:
+                return mob.wasRecentlyAttacked;
+            case MobBehavior.BEHAVIORS.BOSS:
+                return true; // Always aggressive
+            default:
+                return false;
+        }
+    }
+
+    isTargetInRange(mob, target) {
+        const dx = target.x - mob.x;
+        const dy = target.y - mob.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance <= mob.detectionRange;
+    }
+}

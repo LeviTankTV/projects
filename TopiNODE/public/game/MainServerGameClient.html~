@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Client</title>
+    <style>
+        #game-area {
+            position: relative;
+            width: 30000px; /* World width */
+            height: 3000px; /* World height */
+            overflow: hidden; /* Prevent overflow */
+            background-color: #87CEEB; /* Sky color */
+        }
+        .player, .mob {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+        }
+        .player {
+            background-color: blue; /* Player color */
+        }
+        .mob {
+            background-color: red; /* Mob color */
+        }
+    </style>
+</head>
+<body>
+<div id="game-area"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="MainServerGameClient.js" type="module"></script>
+</body>
+</html>

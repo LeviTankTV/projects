@@ -1,0 +1,618 @@
+import { DesertMob } from "./DesertMob.js";
+import { OceanMob } from "./OceanMob.js";
+import { Bee } from "./Bee.js";
+import { BabyAnt } from "./BabyAnt.js";
+import { Hornet } from "./Hornet.js";
+// import { Drop } from "./Drop.js";
+import { RockMob } from "./RockMob.js";
+import { Ladybug } from "./Ladybug.js";
+import { WorkerAnt } from "./WorkerAnt.js";
+
+export class WaveManager {
+    constructor(arena, theme, ctx, player) {
+        this.arena = arena;
+        this.theme = theme;
+        this.ctx = ctx;
+        this.player = player;
+
+        // Wave management
+        this.currentWave = 1;
+        this.mobs = [];
+        this.mobPool = [];
+        this.totalMobs = 0;
+
+        // Spawning parameters
+        this.spawnInterval = 3000; // 3 seconds between spawn batches
+        this.lastSpawnTime = 0;
+        this.minSpawnBatch = 2;
+        this.maxSpawnBatch = 5;
+        this.minDistanceFromPlayer = 150;
+
+        // Theme-based mob selection
+        this.MobClass = this.selectMobClass(theme);
+
+        // Wave progression animation
+        this.progressBarWidth = 0;
+        this.targetProgressBarWidth = 0;
+        this.progressAnimationSpeed = 5;
+        this.setWave = this.setWave.bind(this);
+        this.getCurrentWave = this.getCurrentWave.bind(this);
+        this.resetWave = this.resetWave.bind(this);
+
+        // Expose methods globally
+        window.setWave = (waveNumber) => this.setWave(waveNumber);
+        window.getCurrentWave = () => this.getCurrentWave();
+        window.resetWave = () => this.resetWave();
+        // Wave text animation
+        this.waveTextOpacity = 0;
+        this.waveTextScale = 0.5;
+        this.cleanup = this.cleanup.bind(this);
+        window.spawnMob = (type, rarity) => this.spawnSpecificMob(type, rarity);
+        window.spawnRandomMob = () => this.spawnRandomMob();
+
+        // Drops
+        this.drops = [];
+    }
+
+    spawnDrop(dropConfig) {
+        this.drops.push(dropConfig);
+    }
+
+    // When adding a mob, ensure it's tracked
+    addMob(mob) {
+        if (!this.mobs) this.mobs = [];
+
+        // Add additional tracking or game-specific logic
+        this.mobs.push(mob);
+
+        // Optional: Assign the game reference to the mob
+        mob.game = this;
+    }
+
+
+    spawnSpecificMob(type, rarity) {
+        // Mapping of mob types to their classes
+        const mobTypes = {
+            'Bee': Bee,
+            'BabyAnt': BabyAnt,
+            'DesertMob': DesertMob,
+            'OceanMob': OceanMob,
+            // Add other mob types as needed
+        };
+
+        // Validate inputs
+        const validRarities = [
+            'common', 'uncommon', 'rare',
+            'epic', 'legendary', 'mythic',
+            'ultra', 'super'
+        ];
+
+        if (!mobTypes[type]) {
+            console.error(`Invalid mob type: ${type}. Available types:`, Object.keys(mobTypes));
+            return null;
+        }
+
+        if (!validRarities.includes(rarity)) {
+            console.error(`Invalid rarity: ${rarity}. Available rarities:`, validRarities);
+            return null;
+        }
+
+        // Generate safe spawn point
+        const spawnPoint = this.generateSafeSpawnPoint();
+
+        // Create and add mob
+        const MobClass = mobTypes[type];
+        const newMob = new MobClass(spawnPoint.x, spawnPoint.y, rarity);
+
+        this.mobs.push(newMob);
+        console.log(`Spawned ${rarity} ${type} at (${spawnPoint.x.toFixed(2)}, ${spawnPoint.y.toFixed(2)})`);
+
+        return newMob;
+    }
+
+    spawnRandomMob() {
+        const mobTypes = [
+            'Bee', 'BabyAnt', 'DesertMob', 'OceanMob',
+            'SuperBee', 'UltraBee'
+        ];
+
+        const rarities = [
+            'common', 'uncommon', 'rare',
+            'epic', 'legendary', 'mythic',
+            'ultra', 'super'
+        ];
+
+        const randomType = mobTypes[Math.floor(Math.random() * mobTypes.length)];
+        const randomRarity = rarities[Math.floor(Math.random() * rarities.length)];
+
+        return this.spawnSpecificMob(randomType, randomRarity);
+    }
+
+    setWave(waveNumber) {
+        if (typeof waveNumber !== 'number' || waveNumber < 1) {
+            console.error('Invalid wave number. Must be a positive number.');
+            return;
+        }
+
+        // Set the wave
+        this.currentWave = waveNumber;
+
+        // Regenerate mobs for the new wave
+        this.generateMobs();
+
+        console.log(`Wave set to ${waveNumber}`);
+    }
+
+    getCurrentWave() {
+        console.log(`Current Wave: ${this.currentWave}`);
+        return this.currentWave;
+    }
+
+    resetWave() {
+        this.currentWave = 1;
+        this.generateMobs();
+        console.log('Wave reset to 1');
+    }
+
+
+    selectMobClass(theme) {
+        const mobClasses = {
+            'garden': [Bee, BabyAnt],
+            'desert': DesertMob,
+            'ocean': OceanMob
+        };
+
+        const themeClasses = mobClasses[theme.toLowerCase()] || [Bee];
+        return themeClasses[Math.floor(Math.random() * themeClasses.length)];
+    }
+
+    generateMobs() {
+        // Clear existing mobs and mob pool
+        this.mobs = [];
+        this.mobPool = [];
+
+        if (this.currentWave === 1) {
+            // Debug mode for first wave: spawn ONLY two rock mobs
+            const spawnPoints = [
+                this.generateSafeSpawnPoint(),
+                this.generateSafeSpawnPoint()
+            ];
+
+            spawnPoints.forEach(point => {
+                const rockMob = new RockMob(point.x, point.y, 'common', this.arena);
+                rockMob.waveManager = this;
+                this.mobs.push(rockMob);
+            });
+
+            this.totalMobs = this.mobs.length;
+            this.lastSpawnTime = Date.now();
+            this.animateWaveText();
+
+            // Explicitly clear mob pool to prevent any additional spawns
+            this.mobPool = [];
+
+            return; // Exit the method after spawning rock mobs
+        }
+
+        // Rest of the existing mob generation logic for subsequent waves
+        const baseMobPoolSize = this.calculateMobPoolSize();
+        const mobRarities = this.calculateRarityDistribution();
+
+        // Populate mob pool
+        mobRarities.forEach(({ rarity, percentage }) => {
+            const rarityCount = Math.floor(baseMobPoolSize * percentage);
+            for (let i = 0; i < rarityCount; i++) {
+                this.mobPool.push(rarity);
+            }
+        });
+
+        this.shuffleMobPool();
+        this.adjustSpawnParametersForWave();
+        this.spawnMobBatch();
+
+        this.totalMobs = this.mobPool.length + this.mobs.length;
+        this.lastSpawnTime = Date.now();
+        this.animateWaveText();
+    }
+
+    calculateMobPoolSize() {
+        // Logarithmic scaling for total mob pool
+        const basePoolSize = 50; // Starting pool size
+        const maxPoolSize = 300; // Maximum pool size
+        const scaleFactor = 10; // Controls pool size growth
+
+        return Math.min(
+            maxPoolSize,
+            basePoolSize + Math.floor(Math.log(this.currentWave + 1) * scaleFactor)
+        );
+    }
+
+    calculateRarityDistribution() {
+        const waveFactor = Math.log(this.currentWave + 1);
+
+        const baseRarities = [
+            { rarity: 'common', baseChance: 0.5, decayRate: 0.9 },
+            { rarity: 'uncommon', baseChance: 0.2, decayRate: 0.7 },
+            { rarity: 'rare', baseChance: 0.1, decayRate: 0.5 },
+            { rarity: 'epic', baseChance: 0.07, decayRate: 0.3 },
+            { rarity: 'legendary', baseChance: 0.05, decayRate: 0.2 },
+            { rarity: 'mythic', baseChance: 0.03, decayRate: 0.1 },
+            { rarity: 'ultra', baseChance: 0.02, decayRate: 0.05 },
+            { rarity: 'super', baseChance: 0.01, decayRate: 0.02 }
+        ];
+
+        return baseRarities.map(({ rarity, baseChance, decayRate }) => ({
+            rarity,
+            percentage: baseChance * Math.pow(decayRate, waveFactor)
+        })).filter(r => r.percentage > 0.0001);
+    }
+
+    selectMobClassForRarity(rarity) {
+        const gardenMobClasses = {
+            'common': [
+                { type: Bee, weight: 0.3 },
+                { type: BabyAnt, weight: 0.3 },
+                { type: WorkerAnt, weight: 0.2 },
+                { type: RockMob, weight: 0.2 }
+            ],
+            'uncommon': [
+                { type: Hornet, weight: 0.4 },
+                { type: Ladybug, weight: 0.4 },
+                { type: RockMob, weight: 0.2 }
+            ],
+            'rare': [
+                { type: Hornet, weight: 0.5 },
+                { type: Ladybug, weight: 0.3 },
+                { type: WorkerAnt, weight: 0.2 }
+            ],
+            'epic': [
+                { type: Hornet, weight: 0.6 },
+                { type: Ladybug, weight: 0.4 }
+            ],
+            'legendary': [
+                { type: Hornet, weight: 0.7 },
+                { type: Ladybug, weight: 0.3 }
+            ],
+            'mythic': [
+                { type: Hornet, weight: 0.8 },
+                { type: Ladybug, weight: 0.2 }
+            ],
+            'ultra': [
+                { type: Hornet, weight: 0.9 },
+                { type: Ladybug, weight: 0.1 }
+            ],
+            'super': [
+                { type: Hornet, weight: 1.0 }
+            ]
+        };
+
+        const mobClassPool = this.theme.toLowerCase() === 'garden'
+            ? gardenMobClasses[rarity]
+            : [{ type: this.MobClass, weight: 1.0 }];
+
+        const totalWeight = mobClassPool.reduce((sum, mob) => sum + mob.weight, 0);
+        const randomValue = Math.random() * totalWeight;
+
+        let cumulativeWeight = 0;
+        for (const mobClass of mobClassPool) {
+            cumulativeWeight += mobClass.weight;
+            if (randomValue <= cumulativeWeight) {
+                return mobClass.type;
+            }
+        }
+
+        return mobClassPool[0].type;
+    }
+
+    spawnMobBatch() {
+        const startTime = performance.now();
+        const MAX_SPAWN_TIME = 5;
+
+        // Динамический размер пачки с учетом редкости
+        const spawnBatchSize = Math.floor(
+            Math.random() * (this.maxSpawnBatch - this.minSpawnBatch + 1)
+            + this.minSpawnBatch
+        );
+
+        let spawnedMobs = 0;
+
+        while (
+            this.mobPool.length > 0 &&
+            spawnedMobs < spawnBatchSize &&
+            performance.now() - startTime < MAX_SPAWN_TIME
+            ) {
+            const rarity = this.mobPool.shift();
+            const spawnPoint = this.generateSafeSpawnPoint();
+            const MobClass = this.selectMobClassForRarity(rarity);
+
+            // Бонусы для ultra и super
+            const rarityMultipliers = {
+                'common': 1,
+                'uncommon': 1.2,
+                'rare': 1.5,
+                'epic': 2,
+                'legendary': 2.5,
+                'mythic': 3,
+                'ultra': 4,
+                'super': 5
+            };
+
+            const newMob = new MobClass(
+                spawnPoint.x,
+                spawnPoint.y,
+                rarity,
+                this.arena
+            );
+
+            // Увеличение характеристик для редких мобов
+            newMob.health *= rarityMultipliers[rarity];
+            newMob.damage *= rarityMultipliers[rarity];
+            newMob.speed *= Math.sqrt(rarityMultipliers[rarity]);
+
+            newMob.waveManager = this;
+            this.mobs.push(newMob);
+            spawnedMobs++;
+        }
+    }
+
+    adjustSpawnParametersForWave() {
+        // Dynamically adjust spawn parameters based on wave number
+        const waveScaleFactor = Math.log(this.currentWave + 1);
+
+        // Reduce spawn interval as waves progress
+        this.spawnInterval = Math.max(
+            1000, // Minimum interval of 1 second
+            3000 / waveScaleFactor
+        );
+
+        // Increase spawn batch size
+        this.minSpawnBatch = Math.floor(2 * waveScaleFactor);
+        this.maxSpawnBatch = Math.floor(5 * waveScaleFactor);
+
+        // Increase minimum player distance for higher waves
+        this.minDistanceFromPlayer = Math.min(
+            150 + (this.currentWave * 2),
+            300 // Cap the distance
+        );
+    }
+
+    generateRandomArenaPoint() {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * this.arena.radius;
+
+        return {
+            x: this.arena.x + Math.cos(angle) * radius,
+            y: this.arena.y + Math.sin(angle) * radius
+        };
+    }
+
+    generateSafeSpawnPoint() {
+        const MAX_ATTEMPTS = 30;
+        const minDistance = this.minDistanceFromPlayer;
+
+        for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+            const point = this.generateRandomArenaPoint();
+
+            // Проверка дистанции до игрока
+            const distanceToPlayer = Math.hypot(
+                point.x - this.player.x,
+                point.y - this.player.y
+            );
+
+            // Проверка дистанции до существующих мобов
+            const isValidSpawn = distanceToPlayer >= minDistance &&
+                this.mobs.every(mob =>
+                    Math.hypot(point.x - mob.x, point.y - mob.y) >= minDistance
+                );
+
+            if (isValidSpawn) return point;
+        }
+
+        // Fallback к центру арены
+        return {
+            x: this.arena.x,
+            y: this.arena.y
+        };
+    }
+
+    update(player) {
+
+        // Оптимизация удаления мобов
+        this.mobs = this.mobs.filter(mob => {
+            if (mob.isDead) {
+                const elapsedTime = Date.now() - mob.deathTimer;
+                if (elapsedTime > mob.deathDuration) {
+                    // Безопасное добавление опыта
+                    try {
+                        player.addExperience(mob.experienceValue || 10);
+                    } catch (error) {
+                        console.error('Experience Error:', error);
+                    }
+                    return false; // Удаляем моба
+                }
+                return true;
+            }
+            return true;
+        });
+
+        // Оптимизированный спавн мобов
+        const currentTime = Date.now();
+        if (this.mobPool.length > 0 &&
+            currentTime - this.lastSpawnTime >= this.spawnInterval) {
+            this.spawnMobBatch();
+        }
+
+    }
+
+    draw(ctx) {
+        this.mobs.forEach(mob => {
+            // Check if mob is a Hornet and pass player
+            if (mob.constructor.name === 'Hornet') {
+                mob.draw(ctx, this.player);
+            } else {
+                // For other mob types, use standard draw method
+                mob.draw(ctx);
+            }
+        });
+
+        this.drawWaveProgressBar(ctx);
+        this.drawCurrentWaveRarity(ctx);
+        this.drawWaveText(ctx);
+    }
+
+    drawCurrentWaveRarity(ctx) {
+        if (this.mobs.length > 0) {
+            const firstMob = this.mobs[0];
+            firstMob.drawRarityText(ctx);
+        }
+    }
+
+    drawWaveProgressBar(ctx) {
+        ctx.save();
+        ctx.resetTransform();
+
+        // Bar dimensions and positioning
+        const barWidth = 500;  // Increased width
+        const barHeight = 30;  // Increased height
+        const x = (this.ctx.canvas.width - barWidth) / 2;  // Centered
+        const y = 70;  // Slightly lower on screen
+
+        // Rounded corner radius
+        const cornerRadius = 15;
+
+        // Background bar with shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 3;
+
+        ctx.fillStyle = 'rgba(50, 50, 50, 0.5)';
+        this.roundedRect(ctx, x, y, barWidth, barHeight, cornerRadius);
+        ctx.fill();
+
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Progress bar with gradient
+        const gradient = ctx.createLinearGradient(x, y, x + barWidth, y);
+        gradient.addColorStop(0, 'rgba(46, 204, 113, 0.7)');   // Green
+        gradient.addColorStop(0.5, 'rgba(241, 196, 15, 0.7)'); // Yellow
+        gradient.addColorStop(1, 'rgba(231, 76, 60, 0.7)');    // Red
+
+        ctx.fillStyle = gradient;
+        this.roundedRect(ctx, x, y, this.progressBarWidth, barHeight, cornerRadius);
+        ctx.fill();
+
+        // Border
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 2;
+        this.roundedRect(ctx, x, y, barWidth, barHeight, cornerRadius);
+        ctx.stroke();
+
+        // Wave text above progress bar with advanced styling
+        const waveText = `WAVE ${this.currentWave}`;
+
+        // Outer glow effect
+        ctx.shadowColor = 'rgba(46, 204, 113, 0.7)';
+        ctx.shadowBlur = 10;
+
+        // Gradient text
+        const textGradient = ctx.createLinearGradient(
+            this.ctx.canvas.width / 2 - 100,
+            40,
+            this.ctx.canvas.width / 2 + 100,
+            40
+        );
+        textGradient.addColorStop(0, 'rgba(46, 204, 113, 1)');   // Green
+        textGradient.addColorStop(0.5, 'rgba(241, 196, 15, 1)'); // Yellow
+        textGradient.addColorStop(1, 'rgba(231, 76, 60, 1)');    // Red
+
+        ctx.fillStyle = textGradient;
+        ctx.font = 'bold 48px "Orbitron", sans-serif'; // Modern, tech-like font
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Text with slight 3D effect
+        ctx.fillText(
+            waveText,
+            this.ctx.canvas.width / 2,
+            y - 25
+        );
+
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+
+        ctx.restore();
+    }
+
+// Helper method for rounded rectangles
+    roundedRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+    }
+
+    cleanup() {
+        // Безопасная очистка ресурсов
+        this.mobs.forEach(mob => {
+            if (mob.destroy) mob.destroy();
+            mob = null;
+        });
+
+        this.mobs.length = 0;
+        this.mobPool.length = 0;
+        this.drops.length = 0;
+
+        // Принудительная сборка мусора
+        if (global.gc) global.gc();
+    }
+
+    drawWaveText(ctx) {
+        ctx.save();
+        ctx.resetTransform();
+
+        // Animated wave text
+        ctx.font = `bold ${40 * this.waveTextScale}px Arial`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.waveTextOpacity})`;
+        ctx.textAlign = 'center';
+
+        const waveText = `Wave ${this.currentWave}`;
+        ctx.fillText(
+            waveText,
+            this.ctx.canvas.width / 2,
+            this.ctx.canvas.height / 2
+        );
+
+        ctx.restore();
+    }
+
+    animateWaveText() {
+        this.waveTextOpacity = 1;
+        this.waveTextScale = 0.5;
+    }
+
+    getProgressBarColor() {
+        const remainingMobsRatio = this.mobs.length / this.totalMobs;
+
+        if (remainingMobsRatio > 0.75) return 'rgba(46, 204, 113, 0.7)'; // Green
+        if (remainingMobsRatio > 0.5) return 'rgba(241, 196, 15, 0.7)'; // Yellow
+        if (remainingMobsRatio > 0.25) return 'rgba(230, 126, 34, 0.7)'; // Orange
+        return 'rgba(231, 76, 60, 0.7)'; // Red
+    }
+
+    nextWave() {
+        this.currentWave++;
+        this.generateMobs();
+    }
+
+    isWaveCleared() {
+        // Wave is cleared when both mob pool and active mobs are empty
+        return this.mobs.length === 0 && this.mobPool.length === 0;
+    }
+}

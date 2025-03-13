@@ -1,0 +1,42 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <link rel="icon" type="image/png" href="res/icon.png"> <title>Game Registration</title> <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"> <link rel="stylesheet" href="styles/register.css"> </head> <body> <div class="registration-container"> <h1>Create Account</h1>
+    <form id="registration-form">
+        <div class="input-group">
+            <label for="register-username">Username</label>
+            <input
+                    type="text"
+                    id="register-username"
+                    placeholder="Choose your username"
+                    required
+                    minlength="3"
+                    maxlength="20"
+            >
+            <small class="input-hint">3-20 characters, letters and numbers only</small>
+        </div>
+
+        <div class="input-group">
+            <label for="register-password">Password</label>
+            <input
+                    type="password"
+                    id="register-password"
+                    placeholder="Create a strong password"
+                    required
+                    minlength="6"
+            >
+            <small class="input-hint">At least 6 characters, mix of letters and numbers</small>
+        </div>
+
+        <div class="input-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input
+                    type="password"
+                    id="confirm-password"
+                    placeholder="Repeat your password"
+                    required
+            >
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="notification" class="notification"></div>
+</div> <script type="module" src="registration.js"></script> </body> </html>

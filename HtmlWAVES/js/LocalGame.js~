@@ -1,0 +1,75 @@
+
+document.addEventListener('localGameStart', (event) => {
+    const playerName = event.detail.playerName;
+    const theme = event.detail.theme; // Make sure to pass theme in the event
+
+    // Clear all UI elements (your existing code)
+    const uiElements = [
+        '.start-container',
+        '.theme-selector',
+        '#theme-pointer',
+        '.game-mode-container',
+        '#biome-info',
+        '.animated-title'
+    ];
+
+    uiElements.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.remove();
+        }
+    });
+
+    // Prepare canvas
+    const canvas = document.getElementById('gameCanvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Configure canvas styles
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.margin = '0';
+    canvas.style.padding = '0';
+    canvas.style.zIndex = '10';
+
+    // Ensure body has no margins
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.overflow = 'hidden';
+
+    // Import LocalGameManager dynamically based on theme
+    import(`./LocalGame${theme.charAt(0).toUpperCase() + theme.slice(1)}.js`)
+        .then(module => {
+            // Create the specific theme's local game instance
+            const LocalGameClass = module.default; // Assuming you're using export default
+            const localGame = new LocalGameClass(canvas, playerName, theme);
+
+            // Start the game
+            localGame.start();
+        })
+        .catch(error => {
+            console.error('Failed to load game module:', error);
+            // Optionally show an error to the user
+        });
+});
+
+// Modify your event dispatch to include theme
+startGameBtn.addEventListener('click', () => {
+    const playerName = playerNameInput.value.trim();
+    const gameMode = startContainer.getAttribute('data-game-mode');
+    const theme = startContainer.getAttribute('data-selected-theme'); // Make sure this is set when selecting theme
+
+    if (playerName && gameMode === 'local' && theme) {
+        // Trigger local game start with player name and theme
+        const localGameEvent = new CustomEvent('localGameStart', {
+            detail: {
+                playerName: playerName,
+                theme: theme
+            }
+        });
+        document.dispatchEvent(localGameEvent);
+    }
+});

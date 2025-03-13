@@ -1,0 +1,265 @@
+import { Petal } from './Petal.js';
+
+export class MissilePetal extends Petal {
+    constructor(rarity = 'uncommon') {
+        // Missile parameters based on rarity
+        const missileParameters = {
+            'uncommon': {
+                speed: 5,
+                damage: 50,
+                health: 10,
+                targetSearchRadius: 300
+            },
+            'rare': {
+                speed: 6,
+                damage: 100,
+                health: 15,
+                targetSearchRadius: 350
+            },
+            'epic': {
+                speed: 7,
+                damage: 200,
+                health: 20,
+                targetSearchRadius: 400
+            },
+            'legendary': {
+                speed: 8,
+                damage: 400,
+                health: 25,
+                targetSearchRadius: 450
+            },
+            'mythic': {
+                speed: 9,
+                damage: 800,
+                health: 30,
+                targetSearchRadius: 500
+            },
+            'ultra': {
+                speed: 10,
+                damage: 1600,
+                health: 35,
+                targetSearchRadius: 550
+            },
+            'super': {
+                speed: 11,
+                damage: 3200,
+                health: 40,
+                targetSearchRadius: 600
+            }
+        };
+
+        const color = '#8B4513'; // Brownish color for missile
+        const radius = 15; // Base radius
+
+        // Determine parameters before calling super
+        const params = missileParameters[rarity] || missileParameters['uncommon'];
+
+        super(color, radius, 'missile', true, null, rarity);
+
+        // Set missile-specific properties after super call
+        this.missileParameters = missileParameters;
+        this.params = params;
+
+        // Missile-specific properties
+        this.image = new Image();
+        this.image.src = 'res/missile.png';
+
+        // Throwing properties
+        this.isThrown = false;
+        this.throwAngle = 0;
+        this.target = null;
+        this.distanceTraveled = 0;
+        this.maxTravelDistance = 500; // Maximum travel distance before despawning
+
+        // Override damage and health calculations
+        this._damage = params.damage;
+        this._maxHP = params.health;
+    }
+
+    calculateDamage() {
+        return this._damage;
+    }
+
+    calculateMaxHP() {
+        return this._maxHP;
+    }
+
+    // Method to throw the missile in a specific direction
+    throw(x, y, angle) {
+        this.x = x;
+        this.y = y;
+        this.throwAngle = angle;
+        this.isThrown = true;
+        this.target = null;
+        this.distanceTraveled = 0;
+    }
+
+    // Find nearest target within search radius
+    findTarget(otherMobs) {
+        if (!this.isThrown) return;
+
+        let closestTarget = null;
+        let closestDistance = Infinity;
+
+        for (const mob of otherMobs) {
+            const dx = mob.x - this.x;
+            const dy = mob.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < this.params.targetSearchRadius && distance < closestDistance) {
+                closestTarget = mob;
+                closestDistance = distance;
+            }
+        }
+
+        this.target = closestTarget;
+    }
+
+    // Update missile movement and targeting
+    update(centerX, centerY, angle, otherMobs) {
+        if (!this.isThrown) {
+            // Normal petal orbit behavior when not thrown
+            super.update(centerX, centerY, this.currentDistance, angle);
+            return;
+        }
+
+        // Find target
+        this.findTarget(otherMobs);
+
+        // Move missile
+        if (this.target) {
+            // Aim towards target
+            const dx = this.target.x - this.x;
+            const dy = this.target.y - this.y;
+            this.throwAngle = Math.atan2(dy, dx);
+        }
+
+        // Move in current direction
+        this.x += Math.cos(this.throwAngle) * this.params.speed;
+        this.y += Math.sin(this.throwAngle) * this.params.speed;
+
+        // Track distance traveled
+        this.distanceTraveled += this.params.speed;
+
+        // Check if missile should despawn
+        if (this.distanceTraveled >= this.maxTravelDistance) {
+            this.destroy();
+            return;
+        }
+
+        // Check for mob collisions
+        this.checkMobCollisions(otherMobs);
+    }
+
+    // Check and handle collisions with mobs
+    checkMobCollisions(otherMobs) {
+        for (const mob of otherMobs) {
+            const dx = this.x - mob.x;
+            const dy = this.y - mob.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < mob.size + this.radius) {
+                // Deal damage to mob
+                mob.takeDamage(this.params.damage);
+
+                // Reduce missile health
+                this.currentHP -= mob.health;
+
+                // Destroy missile if health reaches 0
+                if (this.currentHP <= 0) {
+                    this.destroy();
+                    break;
+                }
+            }
+        }
+    }
+
+    checkCollisionWithMob(mob) {
+        // Only check collision if the missile is thrown
+        if (!this.isThrown) return false;
+
+        const dx = this.x - mob.x;
+        const dy = this.y - mob.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        return distance < (this.radius + mob.size);
+    }
+
+    // Add this method to handle damage dealing
+    dealDamageToMob(mob) {
+        if (!this.isThrown) return false;
+
+        // Deal damage to mob
+        mob.takeDamage(this.params.damage);
+
+        // Reduce missile health
+        this.currentHP -= mob.health;
+
+        // Destroy missile if health reaches 0
+        if (this.currentHP <= 0) {
+            this.destroy();
+            return true; // Indicate missile is destroyed
+        }
+
+        return false;
+    }
+
+    // Override draw method to show missile image or shape
+    draw(ctx) {
+        // Only draw if not completely invisible and not thrown
+        if (!this.isThrown && this.currentDistance > 0) {
+            // Normal petal orbit drawing
+            ctx.save();
+
+            // Check if image is loaded
+            if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
+                // Draw image in orbit
+                ctx.translate(this.x, this.y);
+                ctx.drawImage(
+                    this.image,
+                    -this.radius,
+                    -this.radius,
+                    this.radius * 2,
+                    this.radius * 2
+                );
+            } else {
+                // Fallback to drawing a missile-like shape in orbit
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // Drawing for thrown state (existing code)
+        if (this.isThrown) {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.throwAngle);
+
+            // Draw missile image or shape when thrown
+            if (this.image.complete) {
+                ctx.drawImage(
+                    this.image,
+                    -this.radius,
+                    -this.radius,
+                    this.radius * 2,
+                    this.radius * 2
+                );
+            } else {
+                // Fallback missile shape
+                ctx.beginPath();
+                ctx.moveTo(0, -this.radius);
+                ctx.lineTo(this.radius, this.radius);
+                ctx.lineTo(-this.radius, this.radius);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+    }
+}

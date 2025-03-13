@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap'); /* Import a glitchy font */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'VT323', monospace; /* Use the glitchy font */
+    color: white;
+    overflow: hidden;
+    transition: background-color 0.5s ease; /* Smooth transition for background color */
+}
+
+.body-dark {
+    background-color: rgba(0, 0, 0, 0.8); /* Darken the body */
+}
+
+.menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10; /* Keep the menu above other elements */
+}
+
+h1 {
+    font-size: 5em; /* Increase font size */
+    margin-bottom: 20px;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.8), 0 0 10px rgba(255, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.4);
+    animation: glitch 1s infinite; /* Apply glitch animation */
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 2em; /* Increase button font size */
+    color: #fff;
+    background-color: rgba(49, 44, 44, 0.64);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s; /* Add transform transition */
+    position: relative;
+    overflow: hidden;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.8), 0 0 10px rgba(255, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.4);
+    font-family: 'VT323', monospace; /* Use the same glitchy font */
+    animation: glitch 1s infinite; /* Apply glitch animation */
+}
+
+button:hover {
+    background-color: rgba(18, 3, 3, 1);
+    transform: scale(1.1); /* Scale up on hover */
+}
+
+/* Glitch animation for button */
+@keyframes glitch {
+    0% { text-shadow: 2px 0 red, -2px 0 blue, 2px 0 green; }
+    25% { text-shadow: -2px 0 red, 2px 0 blue, -2px 0 green; }
+    50% { text-shadow: 2px 0 red, -2px 0 blue, 2px 0 green; }
+    75% { text-shadow: -2px 0 red, 2px 0 blue, -2px 0 green; }
+    100% { text-shadow: 2px 0 red, -2px 0 blue, 2px 0 green; }
+}
+
+/* Background image with blur */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('res/r.gif'); /* Your scary background image URL */
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    filter: blur(5px);
+}
+
+.newspaper {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -150%); /* Start off-screen above */
+    width: 100%;
+    max-width: 600px;
+    background-color: rgba(2, 24, 25, 0.9);
+    border: 2px solid #000;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    opacity: 0; /* Initially hidden */
+    transition: transform 2s ease, opacity 2s ease; /* Smooth transition */
+    z-index: 20; /* Ensure it's above other elements */
+}
+
+.show {
+    transform: translate(-50%, -50%); /* Bring it to the center */
+    opacity: 1; /* Fade in */
+}
+/* Add a class to hide all menu elements */
+.hide {
+    display: none;
+}
+
+#continueButton {
+    padding: 15px 30px;
+    font-size: 2em; /* Increase button font size */
+    color: #fff;
+    background-color: rgba(2, 24, 25, 0.9); /* Blood-like red color */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.8), 0 0 10px rgba(255, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.4);
+    font-family: 'VT323', monospace; /* Use the same glitchy font */
+    animation: glitch 1s infinite; /* Apply glitch animation */
+}
+
+#continueButton:hover {
+    background-color: rgba(49, 44, 44, 0.64);
+    transform: scale(1.1); /* Scale up on hover */
+}
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 1); /* Dark background */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    cursor: pointer; /* Indicate it's clickable */
+    font-family: 'VT323', monospace;
+    z-index: 30; /* Ensure it's above other elements */
+}

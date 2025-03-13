@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" href="/resources/SupremeDungeonIcon.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>SD III</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Подключение CSS -->
+</head>
+<body>
+<img id="backgroundGif" src="/resources/dungeonBG.gif" alt="Dungeon Background">
+<div id="startMenu">
+    <h1 class="animated-title">Supreme Dungeon III</h1>
+    <button class="menu-button" data-text="Мультиплеер" id="multiplayerButton" onclick="startMultiplayer()">Мультиплеер</button> <br>
+    <button class="menu-button" data-text="Начать Приключение" id="startButton" onclick="startGame()">Начать Приключение</button> <br>
+    <button class="menu-button" data-text="Об игре" id="aboutButton" onclick="showAbout()">Об игре</button> <br>
+    <button class="menu-button" data-text="Настройки" id="settingsButton" onclick="showSettings()">Настройки</button> <br> <!-- Новая кнопка -->
+    <button class="menu-button" data-text="Выход" id="exitButton" onclick="exitGame()">Выход</button> <!-- Новая кнопка -->
+</div>
+<div id="gameContainer">
+    <div id="gameScreen">
+        <h2>Подземелье Авантюриста</h2>
+        <div id="story"></div>
+        <div id="actions"></div>
+        <div id="stats"></div>
+    </div>
+</div>
+<!--<script src="/src/game.js"></script> &lt;!&ndash; Подключение JS &ndash;&gt;-->
+</body>
+</html>

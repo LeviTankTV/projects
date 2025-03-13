@@ -1,0 +1,58 @@
+let audioStarted = false; // Flag to check if audio has started
+
+// Function to play audio
+function playMenuMusic() {
+    const menuMusic = document.getElementById('menuMusic');
+    menuMusic.play().catch(error => {
+        console.log("Autoplay was prevented:", error);
+    });
+}
+
+// Wait for the DOM to fully load
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const menu = document.getElementById('menu');
+
+    // Add event listener to the loading screen
+    loadingScreen.addEventListener('click', function() {
+        loadingScreen.style.display = 'none'; // Hide the loading screen
+        menu.style.display = 'block'; // Show the game menu
+
+        // Start playing music after a brief delay
+        setTimeout(playMenuMusic, 2000); // Play music after 2 seconds
+    });
+
+    // Add event listener for the New Game button
+    document.getElementById('newGameButton').addEventListener('click', function() {
+        const newspaper = document.getElementById('newspaper');
+        const menuElements = document.querySelectorAll('.menu *'); // Select all elements within the menu
+        const continueButton = document.getElementById('continueButton'); // Select the continue button
+
+        // Darken the body by adding the class
+        document.body.classList.add('body-dark');
+
+        // Hide all menu elements
+        menuElements.forEach(element => {
+            element.classList.add('hide'); // Add the hide class to all menu elements
+        });
+
+        // Use setTimeout to delay the appearance of the newspaper
+        setTimeout(() => {
+            newspaper.classList.add('show'); // Add the show class to trigger the CSS transition
+            continueButton.classList.remove('hide'); // Show the continue button
+
+            // Switch the music
+            const menuMusic = document.getElementById('menuMusic'); // Select the menu music
+            const newspaperMusic = document.getElementById('newspaperMusic'); // Select the newspaper music
+
+            menuMusic.pause(); // Pause the menu music
+            newspaperMusic.play(); // Play the newspaper music
+        }, 500); // Delay before showing the newspaper (0.5 seconds)
+    });
+
+    // Add event listener for the Continue button
+    document.getElementById('continueButton').addEventListener('click', function() {
+        const newspaperMusic = document.getElementById('newspaperMusic'); // Select the newspaper music
+        newspaperMusic.play(); // Play the newspaper music
+    });
+});

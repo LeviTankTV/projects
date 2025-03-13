@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="res/LetarIcon.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letar.fin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Add Socket.IO library -->
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="theme-selector">
+    <div class="theme-pointer" id="theme-pointer"></div>
+</div>
+
+<div class="start-container">
+    <h1 class="animated-title">Fail</h1>
+    <div class="name-input-container">
+        <input
+                type="text"
+                id="player-name"
+                placeholder="Enter Your Explorer Name"
+                maxlength="20"
+        >
+        <button id="start-game-btn" class="triangle-btn">▶</button>
+
+        <!-- New Multiplayer Buttons -->
+        <div class="multiplayer-buttons" style="display:none;">
+            <button id="create-room-btn">Create Room</button>
+            <button id="join-room-btn">Join Room</button>
+        </div>
+    </div>
+</div>
+
+<div id="biome-info" style="display:none;">
+    <span id="current-biome">Current Biome: None</span>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- Multiplayer Room Management Modal (initially hidden) -->
+<div id="multiplayer-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="room-content">
+            <!-- Dynamic room content will be inserted here -->
+        </div>
+    </div>
+</div>
+
+<script type="module" src="js/theme-selector.js"></script>
+<script type="module" src="js/localgame-start.js"></script>
+<script type="module" src="js/main.js"></script>
+
+<!-- New Multiplayer Scripts -->
+<script type="module" src="js/multiplayer/RoomManager.js"></script>
+<script type="module" src="js/multiplayer/MultiplayerHandler.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset = "UTF-8">
+  <title>Multiplayer Dungeon Battle</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: black;
+      color: green;
+    }
+    #playerList, #battleArea {
+      border: 1px solid green;
+      margin: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="loginScreen">
+  <input type="text" id="playerNameInput" placeholder="Введите имя">
+  <button onclick="registerPlayer()">Войти</button>
+</div>
+
+<div id="gameScreen" style="display:none;">
+  <h2>Список игроков:</h2>
+  <div id="playerList"></div>
+
+  <div id="battleArea" style="display:none;">
+    <h3>Битва</h3>
+    <div id="battleLog"></div>
+    <button onclick="attack()">Атаковать</button>
+    <p>Здоровье: <span id="playerHealth">100</span></p>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  let currentPlayer = null;
+  let currentBattle = null;
+
+  function registerPlayer() {
+    const playerName = document.getElementById('playerNameInput').value;
+    if (!playerName) return;
+
+    socket.emit('register', playerName);
+    currentPlayer = { name: playerName };
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'block';
+  }
+
+  socket.on('playerList', (players) => {
+    const playerListEl = document.getElementById('playerList');
+    playerListEl.innerHTML = '';
+
+    players.forEach(player => {
+      if (player.id !== socket.id) {
+        const playerEl = document.createElement('div');
+        playerEl.textContent = player.name;
+        playerEl.onclick = () => challengePlayer(player.id);
+        playerListEl.appendChild(playerEl);
+      }
+    });
+  });
+
+  function challengePlayer(targetPlayerId) {
+    socket.emit('challengePlayer', targetPlayerId);
+  }
+
+  socket.on('challengeReceived', (challengeData) => {
+    if (confirm(`${challengeData.challengerName} вызывает вас на бой!`)) {
+      socket.emit('acceptChallenge', challengeData.challengerId);
+    }
+  });
+
+  socket.on('startBattle', (battleData) => {
+    currentBattle = battleData;
+    document.getElementById('battleArea').style.display = 'block';
+    updateBattleLog(`Битва началась с ${battleData.players[1].name}`);
+  });
+
+  function attack() {
+    if (!currentBattle) return;
+
+    const targetPlayer = currentBattle.players.find(p => p.id !== socket.id);
+    socket.emit('attack', {
+      targetId: targetPlayer.id
+    });
+  }
+
+  socket.on('takeDamage', (damageData) => {
+    if (damageData.attackerId === socket.id) return;
+
+    const currentHealth = parseInt(document.getElementById('playerHealth').textContent);
+    const newHealth = Math.max(0, currentHealth - damageData.damage);
+
+    document.getElementById('playerHealth').textContent = newHealth;
+    updateBattleLog(`Вы получили ${damageData.damage} урона!`);
+
+    if (newHealth <= 0) {
+      updateBattleLog('Вы проиграли!');
+    }
+  });
+
+  function updateBattleLog(message) {
+    const logEl = document.getElementById('battleLog');
+    const messageEl = document.createElement('div');
+    messageEl.textContent = message;
+    logEl.appendChild(messageEl);
+  }
+</script>
+</body>
+</html>
