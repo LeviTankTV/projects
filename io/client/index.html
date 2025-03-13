@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="res/icon.png">
+    <title>Topi</title>
+</head>
+<body>
+<div class="registration-container" id="app">
+    <h1 id="formTitle">Register</h1>
+    <form id="userForm">
+        <div class="input-group">
+            <label for="username" style="font-family: 'Comic Sans MS',serif">Username</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="input-group">
+            <label for="password" style="font-family: 'Comic Sans MS',serif">Password</label>
+            <input type="password" id="password" required>
+        </div>
+        <div class="input-group" id="confirmPasswordGroup">
+            <label for="confirmPassword" style="font-family: 'Comic Sans MS',serif">Confirm Password</label>
+            <input type="password" id="confirmPassword" required>
+        </div>
+        <button type="submit" id="SubmitButton">Register</button>
+        <p class="input-hint" id="switchText">
+            <button type="button" id="switchButton">Already have an account? Switch to Login</button>
+        </p>
+    </form>
+    <div class="notification" id="notification"></div>
+</div>
+<div class="game-menu" id="gameMenu" style="display: none;">
+    <h1 id="welcomeMessage">Welcome, <span id="profileUsername">User </span> !</h1>
+    <button id="playButton">Play</button>
+</div>
+
+<div id="kubiki" style="top: 20px; right: 20px; position: absolute">
+    <img src="res/kubiki.png" style="width: 75px; height: 50px" alt="kubiki">
+</div>
+<div class="levelContainer" id="levelContainer" style="display: none;">
+    <h1 class="level-title">Level: <span id="profileLevel">1</span></h1>
+    <h1 class="experience-title">Experience:
+        <span id='profileExperience' class="current-experience">0</span> /
+        <span id='experienceNeeded' class="needed-experience">0</span>
+    </h1>
+    <div class="progress-bar" id="progressBar">
+        <div class="progress" id="progress"></div>
+    </div>
+</div>
+
+<div class="settings-container" id="settingsContainer" style="display: none;">
+    <img src="./res/settingsIcon.png" id="settingsIcon" alt="settings">
+    <img src="res/updatesIcon.png" id="updatesIcon" alt="updates">
+    <div class="settingsMenu" id="settingsMenu">
+        <h1> Settings </h1>
+        <div>
+            <label>
+                <input type="checkbox" id="showCurrentZone" /> Show Current Zone
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="minimap" />
+                Show Minimap
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="showMobRarities" />
+                Show Mob Rarities
+            </label>
+        </div>
+    </div>
+    <div id="updatesList" style="display: none;">
+        <h2>Updates</h2>
+        <ul id="updatesContainer">
+            <!-- Updates will be dynamically added here -->
+        </ul>
+        <button id="closeUpdates">Close</button>
+    </div>
+</div>
+
+<div class="loading-screen" id="loadingScreen" style="display: none;">
+    <h1>Loading...</h1>
+</div>
+
+<div class="hotbar-container" id="hotbarContainer" style="display: none;">
+    <div class="hotbar" id="hotbar1"></div>
+    <div class="hotbar" id="hotbar2"></div>
+</div>
+<button id="inventoryButton" style="display: none">Open Inventory</button>
+
+<canvas id="gameCanvas" style="display: none;"></canvas>
+
+<div id="chatContainer" style="display: none">
+    <div id="messages" style="margin-bottom: 10px;"></div>
+    <label for="chatInput"></label><input id="chatInput" type="text" placeholder="Type a message..." style="width: 100%; padding: 5px; box-sizing: border-box;">
+</div>
+
+<div id="inventoryContainer" style="display: none;">
+    <div id="inventoryIcon" style="position: fixed; bottom: 20px; left: 20px; cursor: pointer;">
+        <img src="res/inventoryIcon.png" alt="Inventory" style="width: 50px; height: 50px;">
+    </div>
+    <div id="inventoryList" style="position: fixed; bottom: 80px; left: 20px; border-radius: 5px; padding: 10px; display: none; z-index: 1000;">
+        <h3>Your Inventory</h3>
+        <ul id="inventoryItems"></ul>
+        <button id="closeInventory">Close</button>
+    </div>
+</div>
+
+<div class="hotbar-container" id="menuhotbarContainer" style="display: none;">
+    <div class="hotbar" id="menuhotbar1"></div>
+    <div class="hotbar" id="menuhotbar2"></div>
+</div>
+
+<button id="gameExit" style="display: none;" onclick="window.location.reload()">
+    <span style="color: darkred; font-weight: bold; font-size: 24px;">&times;</span>
+</button>
+<div id="menuHotbar" style="display: flex; border: 5px solid orange; /* Optional border */ border-radius: 5px; flex-direction: column; align-items: center; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);">
+    <!-- Hotbar slots will be dynamically inserted here -->
+</div>
+<h1 id="hotbarText" style="display: none"> Hotbar </h1>
+<div id="craftingIcon" style="display: none; position: fixed; bottom: 25px; left: 100px; cursor: pointer;">
+    <img src="res/hm.png" alt="Crafting" style="width: 45px; height: 45px;">
+</div>
+
+<div id="craftingMenu" style="display: none">
+    <h3>Crafting Menu</h3>
+    <div id="craftingSelectedPetal"></div>
+    <div id="craftingMessage"></div>
+    <button id="craftButton">Craft</button>
+    <div id="craftingResult"></div>
+    <button id="closeCrafting">Close</button>
+</div>
+
+<div id="gameOverMenu" style="display: none; transition: opacity 0.5s ease-in-out; text-shadow: 1px 1px 2px #000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000000; justify-content: center; align-items: center; flex-direction: column; color: red; font-family: 'Comic Sans MS', sans-serif;">
+    <div id="gameOverMessage" style="font-size: 32px; font-family: 'Comic Sans MS', sans-serif; text-align: center;"></div>
+    <button id="continueButton" style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 15px; background-color: green; color: white; font-size: 18px; cursor: pointer;">Continue</button>
+</div>
+
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script src="registration-login.js"></script>
+<script src="RenderZones.js"></script>
+<script src="InputManager.js"></script>
+<script src="PlayerRenderer.js"></script>
+<script src="petals/Petal.js"></script>
+<script src="flower.js"></script>
+<script src="hotbar.js"></script>
+<script src="./enemies/Arcane.js"></script>
+<script src="enemies/Tyrant.js"></script>
+</body>
+</html>
